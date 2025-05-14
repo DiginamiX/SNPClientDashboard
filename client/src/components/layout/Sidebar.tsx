@@ -57,11 +57,9 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center">
           <div className="flex items-center">
-            <img 
-              src="/snp-logo.png" 
-              alt="SNP Logo" 
-              className="h-10 w-auto object-contain"
-            />
+            <div className="flex items-center justify-center text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-md">
+              SNP
+            </div>
           </div>
           <span className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
             Client Portal
