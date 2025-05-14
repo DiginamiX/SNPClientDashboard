@@ -57,9 +57,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-2">
-            <span className="text-3xl font-bold text-primary">SNP</span>
-            <span className="ml-2 text-xl font-medium text-slate-500 dark:text-slate-400">
+          <div className="flex flex-col items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-2">
+              <div className="flex items-center justify-center text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-white w-12 h-12 rounded-md mb-2">
+                SNP
+              </div>
+            </div>
+            <span className="text-xl font-medium text-slate-700 dark:text-slate-300">
               Client Portal
             </span>
           </div>
