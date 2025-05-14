@@ -48,8 +48,10 @@ export default function Header({ title, setSidebarOpen }: HeaderProps) {
       </div>
 
       {/* Desktop Header */}
-      <header className="hidden md:flex h-16 bg-white dark:bg-slate-800 shadow-sm px-6 items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{title}</h1>
+      <header className="hidden md:flex h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 items-center justify-between">
+        <div className="flex items-center">
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">{title}</h1>
+        </div>
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleTheme}
