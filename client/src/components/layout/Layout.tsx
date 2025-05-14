@@ -1,0 +1,70 @@
+import { useState, useEffect } from "react";
+import { useLocation, useRouter } from "wouter";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import { useAuth } from "@/hooks/useAuth";
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [title, setTitle] = useState("Dashboard");
+  const [location] = useLocation();
+  const [_, navigate] = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    // Update title based on current path
+    switch (location) {
+      case "/":
+        setTitle("Dashboard");
+        break;
+      case "/weight-tracking":
+        setTitle("Weight Tracking");
+        break;
+      case "/progress-photos":
+        setTitle("Progress Photos");
+        break;
+      case "/checkins":
+        setTitle("Check-ins");
+        break;
+      case "/messages":
+        setTitle("Messages");
+        break;
+      case "/meal-plans":
+        setTitle("Meal Plans");
+        break;
+      default:
+        setTitle("Dashboard");
+    }
+  }, [location]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+      <div className="md:pl-64 flex flex-col min-h-screen">
+        <Header title={title} setSidebarOpen={setSidebarOpen} />
+
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
