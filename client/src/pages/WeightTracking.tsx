@@ -58,11 +58,11 @@ export default function WeightTracking() {
     },
     scales: {
       y: {
-        min: 170,
-        max: 190,
+        min: 75,
+        max: 95,
         ticks: {
           color: theme === "dark" ? "#cbd5e1" : "#475569",
-          stepSize: 2
+          stepSize: 1
         },
         grid: {
           color: theme === "dark" ? "rgba(203, 213, 225, 0.1)" : "rgba(71, 85, 105, 0.1)"
@@ -89,7 +89,7 @@ export default function WeightTracking() {
     datasets: [
       {
         label: "Daily Weight",
-        data: [183.2, 183.1, 182.9, 182.7, 182.6, 182.5, 182.4, 182.6, 182.3, 182.4],
+        data: [83.2, 83.1, 82.9, 82.7, 82.6, 82.5, 82.4, 82.6, 82.3, 82.4],
         borderColor: "#3B82F6",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         borderWidth: 2,
@@ -99,7 +99,7 @@ export default function WeightTracking() {
       },
       {
         label: "7-Day Average",
-        data: [183.5, 183.4, 183.3, 183.2, 183.1, 183.0, 182.9, 182.8, 182.6, 182.5],
+        data: [83.5, 83.4, 83.3, 83.2, 83.1, 83.0, 82.9, 82.8, 82.6, 82.5],
         borderColor: "#10B981",
         borderWidth: 2,
         borderDash: [5, 5],
@@ -117,7 +117,7 @@ export default function WeightTracking() {
     datasets: [
       {
         label: "Weekly Average",
-        data: [186.4, 185.2, 184.3, 183.5, 183.1],
+        data: [86.4, 85.2, 84.3, 83.5, 83.1],
         borderColor: "#3B82F6",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         borderWidth: 2,
@@ -134,7 +134,7 @@ export default function WeightTracking() {
     datasets: [
       {
         label: "Monthly Average",
-        data: [190, 189, 188, 187, 185, 183, null, null, null, null, null, null],
+        data: [90, 89, 88, 87, 85, 83, null, null, null, null, null, null],
         borderColor: "#3B82F6",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         borderWidth: 2,
@@ -175,8 +175,8 @@ export default function WeightTracking() {
                       ...defaultChartOptions.scales,
                       y: {
                         ...defaultChartOptions.scales.y,
-                        min: 182,
-                        max: 187
+                        min: 82,
+                        max: 87
                       }
                     }
                   }} 
@@ -191,8 +191,8 @@ export default function WeightTracking() {
                       ...defaultChartOptions.scales,
                       y: {
                         ...defaultChartOptions.scales.y,
-                        min: 180,
-                        max: 195
+                        min: 80,
+                        max: 95
                       }
                     }
                   }} 
@@ -229,16 +229,16 @@ export default function WeightTracking() {
                   </tr>
                 ) : (
                   [
-                    { date: "2023-06-08", weight: 182.4, change: -0.1, notes: "Feeling good today" },
-                    { date: "2023-06-07", weight: 182.5, change: 0.1, notes: "High stress day" },
-                    { date: "2023-06-06", weight: 182.4, change: -0.2, notes: "" },
-                    { date: "2023-06-05", weight: 182.6, change: 0.1, notes: "After weekend" },
-                    { date: "2023-06-04", weight: 182.5, change: -0.2, notes: "Weekend hiking" },
-                    { date: "2023-06-03", weight: 182.7, change: -0.2, notes: "" },
-                    { date: "2023-06-02", weight: 182.9, change: -0.2, notes: "Reduced carbs" },
-                    { date: "2023-06-01", weight: 183.1, change: -0.1, notes: "New month!" },
-                    { date: "2023-05-31", weight: 183.2, change: 0.1, notes: "" },
-                    { date: "2023-05-30", weight: 183.1, change: -0.1, notes: "Back on track" }
+                    { date: "2023-06-08", weight: 82.4, change: -0.1, notes: "Feeling good today" },
+                    { date: "2023-06-07", weight: 82.5, change: 0.1, notes: "High stress day" },
+                    { date: "2023-06-06", weight: 82.4, change: -0.2, notes: "" },
+                    { date: "2023-06-05", weight: 82.6, change: 0.1, notes: "After weekend" },
+                    { date: "2023-06-04", weight: 82.5, change: -0.2, notes: "Weekend hiking" },
+                    { date: "2023-06-03", weight: 82.7, change: -0.2, notes: "" },
+                    { date: "2023-06-02", weight: 82.9, change: -0.2, notes: "Reduced carbs" },
+                    { date: "2023-06-01", weight: 83.1, change: -0.1, notes: "New month!" },
+                    { date: "2023-05-31", weight: 83.2, change: 0.1, notes: "" },
+                    { date: "2023-05-30", weight: 83.1, change: -0.1, notes: "Back on track" }
                   ].map((entry, index) => (
                     <tr 
                       key={index} 

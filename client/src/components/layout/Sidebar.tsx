@@ -59,7 +59,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           <img 
             src="/assets/snp-logo.png" 
             alt="SNP Logo" 
-            className="h-8 object-contain"
+            className="h-10 object-contain"
           />
           <span className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
             Client Portal
