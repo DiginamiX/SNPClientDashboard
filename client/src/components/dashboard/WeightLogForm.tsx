@@ -97,7 +97,7 @@ export default function WeightLogForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Weight (lbs)
+                    Weight (kg)
                   </FormLabel>
                   <FormControl>
                     <Input

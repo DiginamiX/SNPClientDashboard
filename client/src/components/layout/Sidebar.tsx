@@ -57,7 +57,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center">
           <img 
-            src="/src/assets/snp-logo.png" 
+            src="/assets/snp-logo.png" 
             alt="SNP Logo" 
             className="h-8 object-contain"
           />

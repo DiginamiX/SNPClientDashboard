@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useRouter } from "wouter";
+import { useLocation } from "wouter";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,8 +11,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [title, setTitle] = useState("Dashboard");
-  const [location] = useLocation();
-  const [_, navigate] = useRouter();
+  const [location, setLocation] = useLocation();
   const { user, loading } = useAuth();
 
   useEffect(() => {
@@ -44,9 +43,9 @@ export default function Layout({ children }: LayoutProps) {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/login");
+      setLocation("/login");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, setLocation]);
 
   if (loading) {
     return (

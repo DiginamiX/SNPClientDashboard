@@ -228,9 +228,9 @@ export default function Dashboard() {
         <StatCard
           title="Weekly Average"
           value={weightStats.weeklyAverage}
-          unit="lbs"
+          unit="kg"
           change={{
-            value: `${weightStats.weeklyAverageChange} lbs`,
+            value: `${weightStats.weeklyAverageChange} kg`,
             type: "decrease"
           }}
           data={weightStats.weeklyData}

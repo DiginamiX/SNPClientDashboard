@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLocation, useRouter } from 'wouter';
+import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [_, navigate] = useRouter();
+  const [_, setLocation] = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await apiRequest('POST', '/api/auth/login', { username, password });
       const data = await response.json();
       setUser(data.user);
-      navigate('/');
+      setLocation('/');
       toast({
         title: 'Welcome back!',
         description: `You've successfully logged in.`,
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await apiRequest('POST', '/api/auth/register', userData);
       const data = await response.json();
       setUser(data.user);
-      navigate('/');
+      setLocation('/');
       toast({
         title: 'Account created!',
         description: 'You have successfully registered and logged in.',
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await apiRequest('POST', '/api/auth/logout', {});
       setUser(null);
-      navigate('/login');
+      setLocation('/login');
       toast({
         title: 'Logged out',
         description: 'You have been successfully logged out.',

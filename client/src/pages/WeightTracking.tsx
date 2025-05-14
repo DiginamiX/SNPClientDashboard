@@ -245,7 +245,7 @@ export default function WeightTracking() {
                       className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                     >
                       <td className="py-3 px-4">{format(parseISO(entry.date), "MMM d, yyyy")}</td>
-                      <td className="py-3 px-4 text-right font-medium">{entry.weight} lbs</td>
+                      <td className="py-3 px-4 text-right font-medium">{entry.weight} kg</td>
                       <td className={`py-3 px-4 text-right font-medium ${entry.change < 0 ? "text-green-600 dark:text-green-400" : entry.change > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-500 dark:text-slate-400"}`}>
                         {entry.change === 0 ? "-" : entry.change > 0 ? `+${entry.change}` : entry.change}
                       </td>
