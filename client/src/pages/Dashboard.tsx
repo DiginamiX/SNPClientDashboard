@@ -199,7 +199,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Button className="bg-primary hover:bg-blue-600 text-white" onClick={() => navigate("/checkins")}>
+            <Button className="bg-primary hover:bg-blue-600 text-white" onClick={() => setLocation("/checkins")}>
               <i className="ri-calendar-line mr-1"></i> Schedule Check-in
             </Button>
           </div>
@@ -280,12 +280,12 @@ export default function Dashboard() {
                 preview={message.preview}
                 time={message.time}
                 unread={message.unread}
-                onClick={() => navigate("/messages")}
+                onClick={() => setLocation("/messages")}
               />
             ))}
 
             <div className="mt-4">
-              <Button variant="outline" className="w-full" onClick={() => navigate("/messages")}>
+              <Button variant="outline" className="w-full" onClick={() => setLocation("/messages")}>
                 <i className="ri-message-2-line mr-1"></i> New Message
               </Button>
             </div>
@@ -301,7 +301,7 @@ export default function Dashboard() {
         {/* Recent Progress Photos */}
         <ProgressPhotos 
           photos={mockPhotos}
-          onUploadClick={() => navigate("/progress-photos")}
+          onUploadClick={() => setLocation("/progress-photos")}
         />
       </div>
 
@@ -310,13 +310,13 @@ export default function Dashboard() {
         {/* Upcoming Check-ins */}
         <UpcomingCheckins 
           checkins={mockCheckins}
-          onViewCalendarClick={() => navigate("/checkins")}
+          onViewCalendarClick={() => setLocation("/checkins")}
         />
 
         {/* Nutrition Plan */}
         <NutritionPlan 
           plan={mockNutritionPlan}
-          onViewFullPlanClick={() => navigate("/meal-plans")}
+          onViewFullPlanClick={() => setLocation("/meal-plans")}
         />
       </div>
     </>
