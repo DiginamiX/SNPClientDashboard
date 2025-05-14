@@ -57,9 +57,31 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center">
           <div className="flex items-center">
-            <div className="flex items-center justify-center text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-md">
-              SNP
-            </div>
+            <svg 
+              viewBox="0 0 100 100" 
+              className="w-10 h-10"
+              style={{
+                filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.25))'
+              }}
+            >
+              <defs>
+                <linearGradient id="sidebarLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#4f46e5" />
+                </linearGradient>
+              </defs>
+              <rect width="100" height="100" rx="8" fill="url(#sidebarLogoGradient)" />
+              <text 
+                x="50" 
+                y="62" 
+                fontWeight="bold" 
+                fontSize="35" 
+                textAnchor="middle" 
+                fill="white"
+              >
+                SNP
+              </text>
+            </svg>
           </div>
           <span className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
             Client Portal

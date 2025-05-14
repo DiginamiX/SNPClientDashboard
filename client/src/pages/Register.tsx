@@ -75,9 +75,31 @@ export default function Register() {
         <CardHeader className="space-y-1">
           <div className="flex flex-col items-center justify-center mb-4">
             <div className="flex items-center justify-center mb-2">
-              <div className="flex items-center justify-center text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-white w-12 h-12 rounded-md mb-2">
-                SNP
-              </div>
+              <svg 
+                viewBox="0 0 100 100" 
+                className="w-20 h-20 mb-2"
+                style={{
+                  filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.25))'
+                }}
+              >
+                <defs>
+                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#4f46e5" />
+                  </linearGradient>
+                </defs>
+                <rect width="100" height="100" rx="8" fill="url(#logoGradient)" />
+                <text 
+                  x="50" 
+                  y="62" 
+                  fontWeight="bold" 
+                  fontSize="35" 
+                  textAnchor="middle" 
+                  fill="white"
+                >
+                  SNP
+                </text>
+              </svg>
             </div>
             <span className="text-xl font-medium text-slate-700 dark:text-slate-300">
               Client Portal
