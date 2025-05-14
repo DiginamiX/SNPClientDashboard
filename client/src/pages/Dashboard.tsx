@@ -15,7 +15,7 @@ import { format } from "date-fns";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [_, navigate] = useLocation();
+  const [_, setLocation] = useLocation();
 
   // Mock data for initial render
   const weightChartData = {
@@ -27,28 +27,28 @@ export default function Dashboard() {
       "Jun 5", "Jun 6", "Jun 7", "Jun 8"
     ],
     dailyWeights: [
-      184.6, 184.8, 184.5, 184.3, 184.2, 184.5, 184.7, 184.4, 184.2, 184.1, 
-      183.9, 184.0, 183.7, 183.9, 184.1, 183.8, 183.6, 183.5, 183.7, 183.8, 
-      183.5, 183.4, 183.2, 183.6, 183.1, 182.9, 182.7, 182.5, 182.4, 182.6, 
-      182.3, 182.4
+      84.6, 84.8, 84.5, 84.3, 84.2, 84.5, 84.7, 84.4, 84.2, 84.1, 
+      83.9, 84.0, 83.7, 83.9, 84.1, 83.8, 83.6, 83.5, 83.7, 83.8, 
+      83.5, 83.4, 83.2, 83.6, 83.1, 82.9, 82.7, 82.5, 82.4, 82.6, 
+      82.3, 82.4
     ],
     weeklyAverages: [
-      null, null, null, null, null, null, 184.5, 184.4, 184.3, 184.2, 184.1, 
-      184.0, 183.9, 184.0, 183.9, 183.8, 183.7, 183.7, 183.6, 183.7, 183.7, 
-      183.6, 183.5, 183.5, 183.4, 183.3, 183.2, 183.1, 183.0, 182.8, 182.6, 182.5
+      null, null, null, null, null, null, 84.5, 84.4, 84.3, 84.2, 84.1, 
+      84.0, 83.9, 84.0, 83.9, 83.8, 83.7, 83.7, 83.6, 83.7, 83.7, 
+      83.6, 83.5, 83.5, 83.4, 83.3, 83.2, 83.1, 83.0, 82.8, 82.6, 82.5
     ]
   };
 
   // Mock data for stats
   const weightStats = {
-    currentWeight: 182.4,
+    currentWeight: 82.4,
     weeklyChange: 0.8,
-    weeklyAverage: 183.1,
+    weeklyAverage: 83.1,
     weeklyAverageChange: 1.2,
     consistency: 86,
     consistencyChange: 4,
-    dailyData: [183.2, 183.6, 183.1, 182.9, 182.7, 182.5, 182.4],
-    weeklyData: [186.4, 185.2, 184.3, 183.5, 183.1]
+    dailyData: [83.2, 83.6, 83.1, 82.9, 82.7, 82.5, 82.4],
+    weeklyData: [86.4, 85.2, 84.3, 83.5, 83.1]
   };
 
   // Fetch weight logs
@@ -212,9 +212,9 @@ export default function Dashboard() {
         <StatCard
           title="Current Weight"
           value={weightStats.currentWeight}
-          unit="lbs"
+          unit="kg"
           change={{
-            value: `${weightStats.weeklyChange} lbs`,
+            value: `${weightStats.weeklyChange} kg`,
             type: "decrease"
           }}
           data={weightStats.dailyData}
