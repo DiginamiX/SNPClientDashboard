@@ -6,7 +6,8 @@ import {
   progressPhotos, type ProgressPhoto, type InsertProgressPhoto,
   checkins, type Checkin, type InsertCheckin,
   messages, type Message, type InsertMessage,
-  nutritionPlans, type NutritionPlan, type InsertNutritionPlan
+  nutritionPlans, type NutritionPlan, type InsertNutritionPlan,
+  deviceIntegrations, type DeviceIntegration, type InsertDeviceIntegration
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
@@ -283,6 +284,53 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(nutritionPlans.createdAt));
     return nutritionPlan;
+  }
+
+  // Device integration operations
+  async createDeviceIntegration(integration: InsertDeviceIntegration): Promise<DeviceIntegration> {
+    const [createdIntegration] = await db
+      .insert(deviceIntegrations)
+      .values(integration)
+      .returning();
+    
+    return createdIntegration;
+  }
+
+  async getDeviceIntegrationByUserId(userId: number, provider: string): Promise<DeviceIntegration | undefined> {
+    const [integration] = await db
+      .select()
+      .from(deviceIntegrations)
+      .where(
+        and(
+          eq(deviceIntegrations.userId, userId),
+          eq(deviceIntegrations.provider, provider)
+        )
+      );
+    
+    return integration;
+  }
+
+  async getDeviceIntegrationsByUserId(userId: number): Promise<DeviceIntegration[]> {
+    return db
+      .select()
+      .from(deviceIntegrations)
+      .where(eq(deviceIntegrations.userId, userId));
+  }
+
+  async updateDeviceIntegration(id: number, data: Partial<InsertDeviceIntegration>): Promise<DeviceIntegration> {
+    const [updatedIntegration] = await db
+      .update(deviceIntegrations)
+      .set(data)
+      .where(eq(deviceIntegrations.id, id))
+      .returning();
+    
+    return updatedIntegration;
+  }
+
+  async deleteDeviceIntegration(id: number): Promise<void> {
+    await db
+      .delete(deviceIntegrations)
+      .where(eq(deviceIntegrations.id, id));
   }
 }
 
