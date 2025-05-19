@@ -354,19 +354,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get client ID from the logged-in user
       const clientId = (await storage.getClientByUserId(user.id))?.id;
       if (!clientId) {
-        return res.status(400).json({ message: 'Client profile not found' });
+        // Create client profile if it doesn't exist
+        const clientData = {
+          userId: user.id,
+          height: null,
+          startingWeight: null,
+          goalWeight: null,
+          dateOfBirth: null,
+          coachId: null
+        };
+        const client = await storage.createClient(clientData);
+        if (!client) {
+          return res.status(500).json({ message: 'Failed to create client profile' });
+        }
       }
       
-      // Get a coach to assign (for now, just assign coach ID 1)
-      // In a real application, this would be handled more intelligently
+      // Get the client again or use the one we already have
+      const client = await storage.getClientByUserId(user.id);
+      
+      // Get a coach to assign - in this case, we'll use a default coach ID
       const coachId = 1;
       
-      const checkinData = insertCheckinSchema.parse({
-        ...req.body,
-        clientId,
-        coachId,
-        status: 'scheduled' // Set initial status to scheduled
-      });
+      const checkinData = {
+        clientId: client!.id,
+        coachId: coachId,
+        date: req.body.date,
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
+        status: 'scheduled',
+        notes: req.body.notes || null
+      };
       
       const checkin = await storage.createCheckin(checkinData);
       res.status(201).json(checkin);

@@ -191,7 +191,7 @@ export default function Checkins() {
                 <i className="ri-calendar-line mr-1"></i> Schedule Check-in
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Schedule a Check-in</DialogTitle>
                 <DialogDescription>
