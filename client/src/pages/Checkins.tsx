@@ -213,7 +213,7 @@ export default function Checkins() {
                 <i className="ri-calendar-line mr-1"></i> Schedule Check-in
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Schedule a Check-in</DialogTitle>
                 <DialogDescription>
@@ -238,7 +238,7 @@ export default function Checkins() {
                           }
                           className="rounded-md border"
                         />
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           Check-ins can be scheduled up to 60 days in advance.
                         </FormDescription>
                         <FormMessage />
@@ -259,7 +259,7 @@ export default function Checkins() {
                             disabled={scheduleCheckinMutation.isPending}
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           Check-ins are typically 30 minutes long.
                         </FormDescription>
                         <FormMessage />
@@ -276,7 +276,7 @@ export default function Checkins() {
                         <FormControl>
                           <Textarea
                             placeholder="Any specific topics you'd like to discuss..."
-                            rows={3}
+                            rows={2}
                             {...field}
                             disabled={scheduleCheckinMutation.isPending}
                           />
@@ -286,7 +286,7 @@ export default function Checkins() {
                     )}
                   />
                   
-                  <DialogFooter>
+                  <div className="flex justify-end space-x-2 mt-4 py-2 sticky bottom-0 bg-white dark:bg-slate-900">
                     <Button
                       type="button"
                       variant="outline"
@@ -307,7 +307,7 @@ export default function Checkins() {
                         'Schedule Check-in'
                       )}
                     </Button>
-                  </DialogFooter>
+                  </div>
                 </form>
               </Form>
             </DialogContent>
