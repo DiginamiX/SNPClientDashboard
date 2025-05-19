@@ -56,10 +56,10 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen h-full">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className="md:pl-64 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header title={title} setSidebarOpen={setSidebarOpen} />
 
         <main 
