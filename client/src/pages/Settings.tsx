@@ -112,6 +112,33 @@ export default function Settings() {
       });
     },
   });
+  
+  // Mutation for updating avatar
+  const { mutate: updateAvatar, isPending: isUpdatingAvatar } = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      
+      return fetch('/api/users/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+      setIsUploadAvatarDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Failed to update avatar",
+        description: "There was a problem uploading your profile picture. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Mutation for updating password
   const { mutate: updatePassword, isPending: isUpdatingPassword } = useMutation({
@@ -295,16 +322,7 @@ export default function Settings() {
                       <Button
                         onClick={() => {
                           if (avatarFile) {
-                            const formData = new FormData();
-                            formData.append('avatar', avatarFile);
-                            
-                            // Here we would send the avatar to the server
-                            toast({
-                              title: "Avatar updated",
-                              description: "Your profile picture has been updated successfully.",
-                            });
-                            
-                            setIsUploadAvatarDialogOpen(false);
+                            updateAvatar(avatarFile);
                           } else {
                             toast({
                               title: "No image selected",
@@ -313,8 +331,9 @@ export default function Settings() {
                             });
                           }
                         }}
+                        disabled={isUpdatingAvatar}
                       >
-                        Upload
+                        {isUpdatingAvatar ? "Uploading..." : "Upload"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
