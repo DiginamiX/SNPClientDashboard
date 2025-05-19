@@ -103,6 +103,21 @@ export const nutritionPlans = pgTable("nutrition_plans", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Device integrations table (for Feelfit and other services)
+export const deviceIntegrations = pgTable("device_integrations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: text("provider").notNull(), // e.g., "feelfit", "fitbit", etc.
+  externalId: text("external_id"), // User ID in the external system
+  accessToken: text("access_token"), // OAuth token or API key
+  refreshToken: text("refresh_token"), // For OAuth refresh
+  tokenExpiresAt: timestamp("token_expires_at"),
+  lastSyncedAt: timestamp("last_synced_at"),
+  isActive: boolean("is_active").default(true),
+  metadata: text("metadata"), // Additional provider-specific data as JSON string
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   client: one(clients, {
@@ -119,6 +134,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   receivedMessages: many(messages, {
     relationName: "receivedMessages",
   }),
+  deviceIntegrations: many(deviceIntegrations),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -159,6 +175,13 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
 }));
 
+export const deviceIntegrationsRelations = relations(deviceIntegrations, ({ one }) => ({
+  user: one(users, {
+    fields: [deviceIntegrations.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertClientSchema = createInsertSchema(clients).omit({ id: true });
@@ -168,6 +191,7 @@ export const insertProgressPhotoSchema = createInsertSchema(progressPhotos).omit
 export const insertCheckinSchema = createInsertSchema(checkins).omit({ id: true, createdAt: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true, isRead: true });
 export const insertNutritionPlanSchema = createInsertSchema(nutritionPlans).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDeviceIntegrationSchema = createInsertSchema(deviceIntegrations).omit({ id: true, createdAt: true });
 
 // Types for the application
 export type User = typeof users.$inferSelect;
@@ -193,3 +217,6 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
 export type NutritionPlan = typeof nutritionPlans.$inferSelect;
 export type InsertNutritionPlan = z.infer<typeof insertNutritionPlanSchema>;
+
+export type DeviceIntegration = typeof deviceIntegrations.$inferSelect;
+export type InsertDeviceIntegration = z.infer<typeof insertDeviceIntegrationSchema>;

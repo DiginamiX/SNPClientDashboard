@@ -55,6 +55,13 @@ export interface IStorage {
   createNutritionPlan(nutritionPlan: InsertNutritionPlan): Promise<NutritionPlan>;
   getNutritionPlansByClientId(clientId: number): Promise<NutritionPlan[]>;
   getCurrentNutritionPlan(clientId: number): Promise<NutritionPlan | undefined>;
+
+  // Device integration operations
+  createDeviceIntegration(integration: InsertDeviceIntegration): Promise<DeviceIntegration>;
+  getDeviceIntegrationByUserId(userId: number, provider: string): Promise<DeviceIntegration | undefined>;
+  getDeviceIntegrationsByUserId(userId: number): Promise<DeviceIntegration[]>;
+  updateDeviceIntegration(id: number, data: Partial<InsertDeviceIntegration>): Promise<DeviceIntegration>;
+  deleteDeviceIntegration(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
