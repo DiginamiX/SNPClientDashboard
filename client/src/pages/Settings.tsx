@@ -119,16 +119,32 @@ export default function Settings() {
       const formData = new FormData();
       formData.append('avatar', file);
       
-      return fetch('/api/users/avatar', {
+      const response = await fetch('/api/users/avatar', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload avatar');
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Update the user context with the new avatar URL
+      if (data.avatarUrl && user) {
+        user.avatar = data.avatarUrl;
+      }
+      
       toast({
         title: "Avatar updated",
         description: "Your profile picture has been updated successfully.",
       });
+      
+      // Clear the preview and close the dialog
+      setAvatarPreview(null);
+      setAvatarFile(null);
       setIsUploadAvatarDialogOpen(false);
     },
     onError: () => {
@@ -238,8 +254,10 @@ export default function Settings() {
                   <Avatar className="h-16 w-16 mr-4">
                     {avatarPreview ? (
                       <AvatarImage src={avatarPreview} alt="User" />
+                    ) : user?.avatar ? (
+                      <AvatarImage src={user.avatar} alt="User" />
                     ) : (
-                      <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40" alt="User" />
+                      <AvatarImage src="" alt="User" />
                     )}
                     <AvatarFallback>{getInitials()}</AvatarFallback>
                   </Avatar>
