@@ -44,7 +44,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await apiRequest('POST', '/api/auth/login', { username, password });
+      // Use a direct fetch instead of apiRequest to better handle the login response
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Login failed');
+      }
+      
       const data = await response.json();
       setUser(data.user);
       setLocation('/');
