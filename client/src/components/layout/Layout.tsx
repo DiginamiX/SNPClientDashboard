@@ -62,7 +62,16 @@ export default function Layout({ children }: LayoutProps) {
       <div className="md:pl-64 flex flex-col min-h-screen">
         <Header title={title} setSidebarOpen={setSidebarOpen} />
 
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-slate-900">{children}</main>
+        <main 
+          className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-slate-900"
+          onClick={() => {
+            if (sidebarOpen) {
+              setSidebarOpen(false);
+            }
+          }}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );
