@@ -76,12 +76,34 @@ export default function Checkins() {
       startTime.setHours(hours, minutes, 0, 0);
       const endTime = addMinutes(startTime, 30); // 30-minute sessions
       
-      return apiRequest('POST', '/api/checkins/request', {
+      console.log('Submitting check-in request:', {
         date,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         notes: values.notes || null,
       });
+      
+      const response = await fetch('/api/checkins/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+          notes: values.notes || null,
+        }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Check-in request failed:', errorText);
+        throw new Error(`Failed to schedule check-in: ${errorText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/checkins'] });

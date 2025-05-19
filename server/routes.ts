@@ -375,13 +375,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get a coach to assign - in this case, we'll use a default coach ID
       const coachId = 1;
       
+      // Log the incoming data for debugging
+      console.log('Received check-in request data:', req.body);
+      
+      // Parse the data properly for the database
       const checkinData = {
         clientId: client!.id,
         coachId: coachId,
         date: req.body.date,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime,
-        status: 'scheduled',
+        startTime: new Date(req.body.startTime),
+        endTime: new Date(req.body.endTime),
+        status: 'scheduled' as const,
         notes: req.body.notes || null
       };
       
