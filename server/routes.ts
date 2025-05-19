@@ -71,12 +71,13 @@ const MemoryStore = createMemoryStore(session);
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'secret-key',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'secret-key-snp-portal',
+    resave: true,
+    saveUninitialized: true,
     cookie: { 
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      httpOnly: true,
+      secure: false, // Set to false for development to work with HTTP
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     },
     store: new MemoryStore({
       checkPeriod: 86400000 // prune expired entries every 24h
