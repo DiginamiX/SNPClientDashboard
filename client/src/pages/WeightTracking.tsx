@@ -475,16 +475,16 @@ export default function WeightTracking() {
                   </tr>
                 ) : (
                   [
+                    { date: "2023-06-12", weight: 82.1, change: -0.2, notes: "", source: "Feelfit" },
+                    { date: "2023-06-10", weight: 82.3, change: -0.1, notes: "After leg day", source: "Manual" },
                     { date: "2023-06-08", weight: 82.4, change: -0.1, notes: "Feeling good today", source: "Manual" },
                     { date: "2023-06-07", weight: 82.5, change: 0.1, notes: "High stress day", source: "Manual" },
-                    { date: "2023-06-06", weight: 82.4, change: -0.2, notes: "", source: "Manual" },
-                    { date: "2023-06-05", weight: 82.6, change: 0.1, notes: "After weekend", source: "Manual" },
-                    { date: "2023-06-04", weight: 82.5, change: -0.2, notes: "Weekend hiking", source: "Manual" },
-                    { date: "2023-06-03", weight: 82.7, change: -0.2, notes: "", source: "Manual" },
-                    { date: "2023-06-02", weight: 82.9, change: -0.2, notes: "Reduced carbs", source: "Manual" },
-                    { date: "2023-06-01", weight: 83.1, change: -0.1, notes: "New month!", source: "Manual" },
-                    { date: "2023-05-31", weight: 83.2, change: 0.1, notes: "", source: "Manual" },
-                    { date: "2023-05-30", weight: 83.1, change: -0.1, notes: "Back on track", source: "Manual" }
+                    { date: "2023-06-05", weight: 82.4, change: -0.2, notes: "", source: "Feelfit" },
+                    { date: "2023-06-04", weight: 82.6, change: 0.1, notes: "After weekend", source: "Manual" },
+                    { date: "2023-06-03", weight: 82.5, change: -0.2, notes: "Weekend hiking", source: "Manual" },
+                    { date: "2023-06-01", weight: 82.7, change: -0.2, notes: "", source: "Feelfit" },
+                    { date: "2023-05-30", weight: 82.9, change: -0.2, notes: "Reduced carbs", source: "Manual" },
+                    { date: "2023-05-29", weight: 83.1, change: -0.1, notes: "New program started", source: "Manual" }
                   ].map((entry, index) => (
                     <tr 
                       key={index} 
