@@ -58,11 +58,17 @@ export default function Header({ title, setSidebarOpen }: HeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="focus:outline-none">
-                  <img
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-                    alt="User avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt="User avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                      {user?.firstName?.[0] || ''}{user?.lastName?.[0] || ''}
+                    </div>
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -104,11 +110,17 @@ export default function Header({ title, setSidebarOpen }: HeaderProps) {
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     {user?.firstName} {user?.lastName}
                   </span>
-                  <img
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-                    alt="User avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt="User avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                      {user?.firstName?.[0] || ''}{user?.lastName?.[0] || ''}
+                    </div>
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

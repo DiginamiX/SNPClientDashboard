@@ -38,9 +38,12 @@ export default function Login() {
   });
 
   const onSubmit = async (values: FormValues) => {
+    if (isLoggingIn) return; // Prevent double submission
+    
     setIsLoggingIn(true);
     try {
       await login(values.username, values.password);
+      // No need to call setIsLoggingIn(false) on success, as we redirect
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -48,7 +51,6 @@ export default function Login() {
         description: 'Invalid username or password. Please try again.',
         variant: 'destructive'
       });
-    } finally {
       setIsLoggingIn(false);
     }
   };
