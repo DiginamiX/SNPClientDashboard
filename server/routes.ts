@@ -489,6 +489,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Device integration routes
+  apiRouter.get('/integrations', isAuthenticated, async (req, res) => {
+    try {
+      const integrations = await storage.getDeviceIntegrationsByUserId(req.user!.id);
+      res.json(integrations);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching integrations' });
+    }
+  });
+
+  apiRouter.post('/integrations', isAuthenticated, async (req, res) => {
+    try {
+      const integrationData = {
+        ...req.body,
+        userId: req.user!.id
+      };
+      
+      // Check if integration already exists
+      const existingIntegration = await storage.getDeviceIntegrationByUserId(
+        req.user!.id, 
+        integrationData.provider
+      );
+      
+      if (existingIntegration) {
+        // Update existing integration
+        const updated = await storage.updateDeviceIntegration(
+          existingIntegration.id,
+          integrationData
+        );
+        return res.json(updated);
+      }
+      
+      // Create new integration
+      const created = await storage.createDeviceIntegration(integrationData);
+      res.status(201).json(created);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error creating integration' });
+    }
+  });
+
+  apiRouter.delete('/integrations/:id', isAuthenticated, async (req, res) => {
+    try {
+      const integrationId = parseInt(req.params.id);
+      
+      // Check if integration exists and belongs to user
+      const integrations = await storage.getDeviceIntegrationsByUserId(req.user!.id);
+      const userOwnsIntegration = integrations.some(i => i.id === integrationId);
+      
+      if (!userOwnsIntegration) {
+        return res.status(403).json({ message: 'Unauthorized to delete this integration' });
+      }
+      
+      await storage.deleteDeviceIntegration(integrationId);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: 'Server error deleting integration' });
+    }
+  });
+
+  // Webhook for Feelfit data
+  app.post('/api/webhook/feelfit', async (req, res) => {
+    try {
+      // Extract the relevant data from the webhook payload
+      const { userId, weight, timestamp, token } = req.body;
+      
+      if (!userId || !weight || !timestamp || !token) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+      
+      // Verify the token matches the stored token for this integration
+      const integration = await storage.getDeviceIntegrationByUserId(
+        parseInt(userId), 
+        'feelfit'
+      );
+      
+      if (!integration || integration.accessToken !== token) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      
+      // Get the client associated with this user
+      const client = await storage.getClientByUserId(parseInt(userId));
+      if (!client) {
+        return res.status(404).json({ message: 'Client not found' });
+      }
+      
+      // Create a new weight log from the Feelfit data
+      const weightLog = {
+        clientId: client.id,
+        weight: parseFloat(weight),
+        date: new Date(timestamp),
+        notes: 'Recorded from Feelfit scale'
+      };
+      
+      const created = await storage.createWeightLog(weightLog);
+      
+      // Update the integration's last synced timestamp
+      await storage.updateDeviceIntegration(integration.id, {
+        lastSyncedAt: new Date(),
+      });
+      
+      res.status(201).json({ success: true, data: created });
+    } catch (error) {
+      console.error('Feelfit webhook error:', error);
+      res.status(500).json({ message: 'Server error processing Feelfit data' });
+    }
+  });
+
   // Mount API routes
   app.use('/api', apiRouter);
   
