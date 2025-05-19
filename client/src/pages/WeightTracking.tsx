@@ -444,6 +444,10 @@ export default function WeightTracking() {
                 >
                   Connect Feelfit Scale
                 </Button>
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>Note: This is a demo integration.</p>
+                  <p>In a real implementation, users would authenticate with their Feelfit account.</p>
+                </div>
               </div>
             )}
           </div>
