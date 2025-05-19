@@ -107,13 +107,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         />
 
         <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700">
-          <a
-            href="#"
-            className="flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-          >
-            <i className="ri-settings-4-line text-xl mr-3"></i>
-            <span>Settings</span>
-          </a>
+          <Link href="/settings">
+            <a
+              className="flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <i className="ri-settings-4-line text-xl mr-3"></i>
+              <span>Settings</span>
+            </a>
+          </Link>
           <button
             onClick={logout}
             className="w-full flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"

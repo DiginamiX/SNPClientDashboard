@@ -11,6 +11,7 @@ import ProgressPhotos from "@/pages/ProgressPhotos";
 import Checkins from "@/pages/Checkins";
 import Messages from "@/pages/Messages";
 import MealPlans from "@/pages/MealPlans";
+import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Layout from "@/components/layout/Layout";
@@ -34,6 +35,7 @@ function Router() {
             <Route path="/checkins" component={Checkins} />
             <Route path="/messages" component={Messages} />
             <Route path="/meal-plans" component={MealPlans} />
+            <Route path="/settings" component={Settings} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

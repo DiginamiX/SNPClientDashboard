@@ -1,5 +1,15 @@
+import { useState } from "react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { useLocation } from "wouter";
 
 interface HeaderProps {
   title: string;
@@ -8,10 +18,17 @@ interface HeaderProps {
 
 export default function Header({ title, setSidebarOpen }: HeaderProps) {
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+  
+  const handleSettingsClick = () => {
+    setIsProfileMenuOpen(false);
+    setLocation("/settings");
   };
 
   return (
@@ -38,11 +55,29 @@ export default function Header({ title, setSidebarOpen }: HeaderProps) {
             ></i>
           </button>
           <div className="relative">
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-              alt="User avatar"
-              className="w-8 h-8 rounded-full object-cover"
-            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="focus:outline-none">
+                  <img
+                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSettingsClick}>
+                  <i className="ri-settings-4-line mr-2"></i>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>
+                  <i className="ri-logout-box-line mr-2"></i>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -63,16 +98,32 @@ export default function Header({ title, setSidebarOpen }: HeaderProps) {
             ></i>
           </button>
           <div className="relative">
-            <button className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-                alt="User avatar"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center space-x-2 focus:outline-none">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                  <img
+                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSettingsClick}>
+                  <i className="ri-settings-4-line mr-2"></i>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>
+                  <i className="ri-logout-box-line mr-2"></i>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
