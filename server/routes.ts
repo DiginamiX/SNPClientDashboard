@@ -196,9 +196,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  apiRouter.post('/auth/login', passport.authenticate('local'), (req, res) => {
-    // If this function is called, authentication was successful
-    res.json({ user: { ...(req.user as any), password: undefined } });
+  apiRouter.post('/auth/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ message: 'Server error during login' });
+      }
+      
+      if (!user) {
+        console.error('Login failed:', info);
+        return res.status(401).json({ message: 'Invalid username or password' });
+      }
+      
+      // Log the user in manually
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Login session error:', err);
+          return res.status(500).json({ message: 'Error during login session creation' });
+        }
+        
+        // Authentication successful
+        return res.json({ user: { ...user, password: undefined } });
+      });
+    })(req, res, next);
   });
 
   apiRouter.post('/auth/logout', (req, res) => {
