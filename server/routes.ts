@@ -10,8 +10,11 @@ import {
   insertProgressPhotoSchema,
   insertCheckinSchema,
   insertMessageSchema,
-  insertNutritionPlanSchema
+  insertNutritionPlanSchema,
+  users
 } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -593,6 +596,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Feelfit webhook error:', error);
       res.status(500).json({ message: 'Server error processing Feelfit data' });
+    }
+  });
+
+  // Avatar upload route
+  apiRouter.post('/users/avatar', isAuthenticated, upload.single('avatar'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      const user = req.user as any;
+      const avatarPath = `/uploads/${user.id}/${req.file.filename}`;
+      
+      // Update user with avatar path in database
+      const updatedUser = await db
+        .update(users)
+        .set({ avatar: avatarPath })
+        .where(eq(users.id, user.id))
+        .returning();
+      
+      if (!updatedUser.length) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json({ 
+        success: true, 
+        avatarUrl: avatarPath,
+        user: { ...updatedUser[0], password: undefined }
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      res.status(500).json({ message: 'Server error uploading avatar' });
     }
   });
 
