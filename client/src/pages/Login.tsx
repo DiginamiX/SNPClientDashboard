@@ -60,7 +60,7 @@ export default function Login() {
           <div className="flex flex-col items-center justify-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <img 
-                src="/src/assets/snp-logo.png" 
+                src="/snp-logo.png" 
                 alt="Stuart Nutrition and Performance" 
                 className="h-20 mb-2"
                 style={{

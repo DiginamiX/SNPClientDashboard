@@ -57,52 +57,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center">
           <div className="flex items-center">
-            <svg 
-              viewBox="0 0 100 100" 
-              className="w-10 h-10"
+            <img 
+              src="/snp-logo.png" 
+              alt="Stuart Nutrition and Performance" 
+              className="h-10"
               style={{
-                filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.25))'
+                filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.15))'
               }}
-            >
-              <defs>
-                <linearGradient id="sidebarLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#4f46e5" />
-                </linearGradient>
-                <linearGradient id="sidebarLetterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="100%" stopColor="#f0f0f0" />
-                </linearGradient>
-              </defs>
-              <rect width="100" height="100" rx="12" fill="url(#sidebarLogoGradient)" />
-              
-              {/* Stylized 'S' */}
-              <path 
-                d="M30,30 C40,25 45,35 35,40 C25,45 45,55 45,65 C45,72 35,75 25,70" 
-                stroke="url(#sidebarLetterGradient)" 
-                strokeWidth="6" 
-                strokeLinecap="round" 
-                fill="none"
-              />
-              
-              {/* Stylized 'N' */}
-              <path 
-                d="M50,30 L50,70 M50,30 L70,70 M70,30 L70,70" 
-                stroke="url(#sidebarLetterGradient)" 
-                strokeWidth="6" 
-                strokeLinecap="round" 
-                fill="none"
-              />
-              
-              {/* Stylized 'P' */}
-              <path 
-                d="M75,30 L75,70 M75,30 C85,30 90,35 90,45 C90,55 85,60 75,60" 
-                stroke="url(#sidebarLetterGradient)" 
-                strokeWidth="6" 
-                strokeLinecap="round" 
-                fill="none"
-              />
-            </svg>
+            />
           </div>
           <span className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
             Client Portal
