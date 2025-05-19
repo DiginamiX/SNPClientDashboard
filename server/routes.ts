@@ -374,6 +374,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get client ID from the logged-in user
       const clientId = (await storage.getClientByUserId(user.id))?.id;
+      let client;
+      
       if (!clientId) {
         // Create client profile if it doesn't exist
         const clientData = {
@@ -384,14 +386,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dateOfBirth: null,
           coachId: null
         };
-        const client = await storage.createClient(clientData);
+        client = await storage.createClient(clientData);
         if (!client) {
           return res.status(500).json({ message: 'Failed to create client profile' });
         }
+      } else {
+        // Get the client again or use the one we already have
+        client = await storage.getClientByUserId(user.id);
       }
-      
-      // Get the client again or use the one we already have
-      const client = await storage.getClientByUserId(user.id);
       
       // Get a coach to assign - in this case, we'll use a default coach ID
       const coachId = 1;
@@ -399,25 +401,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log the incoming data for debugging
       console.log('Received check-in request data:', req.body);
       
+      // Validate the required fields
+      if (!req.body.date || !req.body.startTime || !req.body.endTime) {
+        return res.status(400).json({ 
+          message: 'Missing required fields',
+          details: 'Please provide date, startTime, and endTime' 
+        });
+      }
+      
       // Parse the data properly for the database
       const checkinData = {
-        clientId: client!.id,
+        clientId: client?.id || 0,
         coachId: coachId,
         date: req.body.date,
-        startTime: new Date(req.body.startTime),
-        endTime: new Date(req.body.endTime),
-        status: 'scheduled' as const,
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
+        status: 'scheduled',
         notes: req.body.notes || null
       };
       
+      console.log('Creating check-in with data:', checkinData);
+      
       const checkin = await storage.createCheckin(checkinData);
+      console.log('Check-in created:', checkin);
       res.status(201).json(checkin);
     } catch (error) {
       console.error('Check-in request error:', error);
       if (error instanceof ZodError) {
-        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+        return res.status(400).json({ 
+          message: 'Invalid data', 
+          errors: error.errors 
+        });
       }
-      res.status(500).json({ message: 'Server error requesting check-in' });
+      res.status(500).json({ 
+        message: 'Server error requesting check-in', 
+        error: (error as Error).message 
+      });
     }
   });
 

@@ -42,8 +42,28 @@ export default function Login() {
     
     setIsLoggingIn(true);
     try {
-      await login(values.username, values.password);
-      // No need to call setIsLoggingIn(false) on success, as we redirect
+      // Direct fetch login instead of using the hook
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          username: values.username, 
+          password: values.password 
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+      
+      const data = await response.json();
+      
+      // Set the user and redirect
+      window.location.href = '/'; // Force full page reload to ensure session is properly established
+      
     } catch (error) {
       console.error('Login error:', error);
       toast({
