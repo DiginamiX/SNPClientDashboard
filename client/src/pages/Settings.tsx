@@ -59,6 +59,9 @@ export default function Settings() {
   const { user } = useAuth();
   const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(true);
   const [isSmsNotificationsEnabled, setIsSmsNotificationsEnabled] = useState(false);
+  const [isUploadAvatarDialogOpen, setIsUploadAvatarDialogOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // Initialize profile form
   const profileForm = useForm<ProfileFormValues>({
@@ -197,11 +200,19 @@ export default function Settings() {
               <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-8">
                 <div className="flex items-center mb-8">
                   <Avatar className="h-16 w-16 mr-4">
-                    <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40" alt="User" />
+                    {avatarPreview ? (
+                      <AvatarImage src={avatarPreview} alt="User" />
+                    ) : (
+                      <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40" alt="User" />
+                    )}
                     <AvatarFallback>{getInitials()}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setIsUploadAvatarDialogOpen(true)}
+                    >
                       Change Avatar
                     </Button>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -209,6 +220,96 @@ export default function Settings() {
                     </p>
                   </div>
                 </div>
+                
+                <Dialog open={isUploadAvatarDialogOpen} onOpenChange={setIsUploadAvatarDialogOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Upload Profile Picture</DialogTitle>
+                      <DialogDescription>
+                        Choose an image to use as your profile picture.
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="avatar">Profile Picture</Label>
+                        <Input
+                          id="avatar"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 1024 * 1024) {
+                                toast({
+                                  title: "File too large",
+                                  description: "Please select an image under 1MB.",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+                              
+                              setAvatarFile(file);
+                              const reader = new FileReader();
+                              reader.onload = (e) => {
+                                if (e.target?.result) {
+                                  setAvatarPreview(e.target.result as string);
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </div>
+                      
+                      {avatarPreview && (
+                        <div className="flex justify-center">
+                          <Avatar className="h-24 w-24">
+                            <AvatarImage src={avatarPreview} alt="Preview" />
+                            <AvatarFallback>{getInitials()}</AvatarFallback>
+                          </Avatar>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setIsUploadAvatarDialogOpen(false);
+                          setAvatarFile(null);
+                          setAvatarPreview(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (avatarFile) {
+                            const formData = new FormData();
+                            formData.append('avatar', avatarFile);
+                            
+                            // Here we would send the avatar to the server
+                            toast({
+                              title: "Avatar updated",
+                              description: "Your profile picture has been updated successfully.",
+                            });
+                            
+                            setIsUploadAvatarDialogOpen(false);
+                          } else {
+                            toast({
+                              title: "No image selected",
+                              description: "Please select an image to upload.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
