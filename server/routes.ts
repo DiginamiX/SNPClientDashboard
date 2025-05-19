@@ -414,9 +414,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clientId: client?.id || 0,
         coachId: coachId,
         date: req.body.date,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime,
-        status: 'scheduled',
+        startTime: new Date(req.body.startTime),
+        endTime: new Date(req.body.endTime),
+        status: 'scheduled' as const,
         notes: req.body.notes || null
       };
       

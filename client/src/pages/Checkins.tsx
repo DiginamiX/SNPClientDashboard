@@ -144,53 +144,7 @@ export default function Checkins() {
   });
 
   const onSubmit = async (values: FormValues) => {
-    try {
-      const date = format(values.date, 'yyyy-MM-dd');
-      const [hours, minutes] = values.time.split(':').map(Number);
-      const startTime = new Date(values.date);
-      startTime.setHours(hours, minutes, 0, 0);
-      const endTime = addMinutes(startTime, 30); // 30-minute sessions
-      
-      const requestData = {
-        date,
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
-        notes: values.notes || null
-      };
-      
-      console.log('Submitting directly:', requestData);
-      
-      const response = await fetch('/api/checkins/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to schedule check-in');
-      }
-      
-      // Successfully created check-in
-      queryClient.invalidateQueries({ queryKey: ['/api/checkins'] });
-      toast({
-        title: 'Check-in scheduled',
-        description: 'Your check-in has been successfully scheduled.'
-      });
-      
-      setOpen(false);
-      form.reset();
-    } catch (error) {
-      console.error('Error scheduling check-in:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to schedule check-in. Please try again.',
-        variant: 'destructive'
-      });
-    }
+    scheduleCheckinMutation.mutate(values);
   };
 
   const handleConfirmCheckin = (id: number) => {
