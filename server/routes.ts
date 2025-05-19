@@ -345,6 +345,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Server error creating check-in' });
     }
   });
+  
+  // Route for clients to request a check-in
+  apiRouter.post('/checkins/request', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Get client ID from the logged-in user
+      const clientId = (await storage.getClientByUserId(user.id))?.id;
+      if (!clientId) {
+        return res.status(400).json({ message: 'Client profile not found' });
+      }
+      
+      // Get a coach to assign (for now, just assign coach ID 1)
+      // In a real application, this would be handled more intelligently
+      const coachId = 1;
+      
+      const checkinData = insertCheckinSchema.parse({
+        ...req.body,
+        clientId,
+        coachId,
+        status: 'scheduled' // Set initial status to scheduled
+      });
+      
+      const checkin = await storage.createCheckin(checkinData);
+      res.status(201).json(checkin);
+    } catch (error) {
+      console.error('Check-in request error:', error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error requesting check-in' });
+    }
+  });
 
   apiRouter.get('/checkins', isAuthenticated, async (req, res) => {
     try {
