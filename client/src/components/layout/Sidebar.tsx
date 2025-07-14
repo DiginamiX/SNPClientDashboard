@@ -16,9 +16,9 @@ const SidebarNavItem = ({ href, icon, label, badge }: SidebarNavItemProps) => {
 
   return (
     <Link href={href}>
-      <a
+      <span
         className={cn(
-          "flex items-center px-4 py-3 text-base font-medium rounded-lg",
+          "flex items-center px-4 py-3 text-base font-medium rounded-lg cursor-pointer transition-colors duration-200",
           isActive
             ? "bg-blue-50 dark:bg-slate-700 text-primary dark:text-blue-400"
             : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
@@ -31,7 +31,7 @@ const SidebarNavItem = ({ href, icon, label, badge }: SidebarNavItemProps) => {
             {badge}
           </span>
         )}
-      </a>
+      </span>
     </Link>
   );
 };

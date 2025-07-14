@@ -69,15 +69,32 @@ const upload = multer({
 const MemoryStore = createMemoryStore(session);
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add CORS headers for mobile compatibility
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+      return;
+    }
+    
+    next();
+  });
+
   // Set up authentication
   app.use(session({
     secret: process.env.SESSION_SECRET || 'secret-key-snp-portal',
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: { 
       httpOnly: true,
-      secure: false, // Set to false for development to work with HTTP
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: 'lax' // Better mobile compatibility
     },
     store: new MemoryStore({
       checkPeriod: 86400000 // prune expired entries every 24h

@@ -107,4 +107,30 @@ Preferred communication style: Simple, everyday language.
 - `/uploads` - User-uploaded files (progress photos)
 - `/dist` - Production build output
 
+## Recent Changes: Latest modifications with dates
+
+### January 2025 - Mobile Access Fixes
+- Fixed DOM nesting warnings in sidebar navigation components (using span instead of nested anchor tags)
+- Updated viewport meta tag to improve mobile rendering (`user-scalable=yes`, `maximum-scale=5.0`)
+- Enhanced mobile CSS with touch-friendly button sizes (min-height: 44px) and iOS text scaling prevention
+- Improved session cookie configuration with `sameSite: 'lax'` for better mobile compatibility
+- Added CORS headers for mobile browser compatibility
+- Fixed mobile form input appearance and styling issues
+
+### Previous Updates
+- Resolved persistent login issue requiring two submission attempts
+- Fixed check-in scheduling by creating missing coach database records
+- Improved dialog component scrolling and mobile accessibility
+- Successfully completed deployment process for production release
+
+## Troubleshooting
+
+### Mobile Access Issues
+If users report mobile access problems:
+1. Check deployment URL accessibility from mobile devices
+2. Verify session cookie settings are mobile-friendly (`sameSite: 'lax'`)
+3. Ensure viewport meta tag is properly configured
+4. Test touch interactions and form inputs on mobile devices
+5. Verify CORS headers are properly set for mobile browsers
+
 The application follows a monorepo structure with clear separation between frontend, backend, and shared code, making it maintainable and scalable for a fitness coaching platform.

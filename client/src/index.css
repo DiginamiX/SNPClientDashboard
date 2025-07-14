@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%; /* Prevent iOS text scaling */
+  }
+  
+  /* Improve touch targets */
+  button,
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+  }
+  
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Improve text readability */
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  /* Better mobile form handling */
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.375rem;
+  }
+  
+  /* Ensure proper z-index for mobile overlays */
+  .mobile-overlay {
+    z-index: 9999;
+  }
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;
