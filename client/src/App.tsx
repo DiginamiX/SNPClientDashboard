@@ -14,18 +14,20 @@ import MealPlans from "@/pages/MealPlans";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
 import Layout from "@/components/layout/Layout";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "next-themes";
 
 function Router() {
   const [location] = useLocation();
-  const isAuthPage = location === "/login" || location === "/register";
+  const isAuthPage = location === "/login" || location === "/register" || location === "/forgot-password";
 
   return (
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       {isAuthPage ? null : (
         <Layout>
           <Switch>

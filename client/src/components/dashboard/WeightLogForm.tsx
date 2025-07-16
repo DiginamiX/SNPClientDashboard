@@ -50,7 +50,7 @@ export default function WeightLogForm() {
     setIsSubmitting(true);
     try {
       const response = await apiRequest("POST", "/api/weight-logs", {
-        weight: values.weight,
+        weight: values.weight.toString(), // Convert number to string for decimal field
         date: values.date,
         notes: values.notes || null,
       });
