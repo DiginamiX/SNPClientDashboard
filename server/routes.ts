@@ -24,6 +24,7 @@ import createMemoryStore from "memorystore";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -247,6 +248,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   apiRouter.get('/auth/me', isAuthenticated, (req, res) => {
     res.json({ user: { ...(req.user as any), password: undefined } });
+  });
+
+  // Password reset routes
+  apiRouter.post('/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // For security, don't reveal if email exists or not
+        return res.json({ message: 'If the email exists, a password reset link has been sent.' });
+      }
+      
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+      
+      // Store reset token in database
+      await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
+      
+      // Check if SendGrid is configured
+      if (process.env.SENDGRID_API_KEY) {
+        // TODO: Send actual email using SendGrid
+        console.log(`Password reset requested for ${email}. Reset token: ${resetToken}`);
+        // For now, we'll just log the reset URL
+        const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+        console.log(`Reset URL: ${resetUrl}`);
+      } else {
+        console.log(`Password reset requested for ${email}, but no email service configured. Reset token: ${resetToken}`);
+      }
+      
+      res.json({ message: 'If the email exists, a password reset link has been sent.' });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'Server error processing password reset request' });
+    }
+  });
+  
+  apiRouter.post('/auth/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Token and new password are required' });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+      }
+      
+      // Find user with valid reset token
+      const user = await storage.getUserByResetToken(token);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password and clear reset token
+      await storage.updatePassword(user.id, hashedPassword);
+      await storage.clearPasswordResetToken(user.id);
+      
+      res.json({ message: 'Password has been successfully reset.' });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ message: 'Server error resetting password' });
+    }
   });
 
   // Weight logging routes

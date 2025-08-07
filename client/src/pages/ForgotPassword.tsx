@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { apiRequest } from '@/lib/queryClient';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address')
@@ -38,20 +39,20 @@ export default function ForgotPassword() {
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      // For now, we'll simulate the password reset process
-      // In a real app, this would send a request to the server
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const response = await apiRequest('POST', '/api/auth/forgot-password', { email: values.email });
+      const data = await response.json();
       
       setEmailSent(true);
       toast({
-        title: 'Password reset email sent',
-        description: 'Check your inbox for further instructions.',
+        title: 'Password reset request submitted',
+        description: data.message || 'If the email exists in our system, you will receive a password reset link.',
         variant: 'default'
       });
     } catch (error) {
+      console.error('Password reset error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to send password reset email. Please try again.',
+        description: 'Failed to send password reset request. Please try again.',
         variant: 'destructive'
       });
     } finally {

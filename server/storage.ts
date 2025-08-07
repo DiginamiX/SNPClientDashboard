@@ -63,6 +63,12 @@ export interface IStorage {
   getDeviceIntegrationsByUserId(userId: number): Promise<DeviceIntegration[]>;
   updateDeviceIntegration(id: number, data: Partial<InsertDeviceIntegration>): Promise<DeviceIntegration>;
   deleteDeviceIntegration(id: number): Promise<void>;
+  
+  // Password reset operations
+  setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
+  updatePassword(userId: number, hashedPassword: string): Promise<void>;
+  clearPasswordResetToken(userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -331,6 +337,47 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(deviceIntegrations)
       .where(eq(deviceIntegrations.id, id));
+  }
+  
+  // Password reset operations
+  async setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        resetToken: token, 
+        resetTokenExpiry: expiry 
+      })
+      .where(eq(users.id, userId));
+  }
+  
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.resetToken, token),
+          gte(users.resetTokenExpiry, new Date())
+        )
+      );
+    return user;
+  }
+  
+  async updatePassword(userId: number, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, userId));
+  }
+  
+  async clearPasswordResetToken(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        resetToken: null, 
+        resetTokenExpiry: null 
+      })
+      .where(eq(users.id, userId));
   }
 }
 
