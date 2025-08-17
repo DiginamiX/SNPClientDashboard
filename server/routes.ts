@@ -25,6 +25,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -216,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   apiRouter.post('/auth/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
+    passport.authenticate('local', (err: any, user: any, info: any) => {
       if (err) {
         console.error('Login error:', err);
         return res.status(500).json({ message: 'Server error during login' });
@@ -273,15 +274,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store reset token in database
       await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
       
-      // Check if SendGrid is configured
-      if (process.env.SENDGRID_API_KEY) {
-        // TODO: Send actual email using SendGrid
-        console.log(`Password reset requested for ${email}. Reset token: ${resetToken}`);
-        // For now, we'll just log the reset URL
-        const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
-        console.log(`Reset URL: ${resetUrl}`);
+      // Check if MailerSend is configured
+      if (process.env.MAILERSEND_API_KEY) {
+        try {
+          const mailerSend = new MailerSend({
+            apiKey: process.env.MAILERSEND_API_KEY,
+          });
+
+          const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+          
+          const sentFrom = new Sender("noreply@trial-z3m5jgrl0184dpyo.mlsender.net", "Fitness Portal");
+          const recipients = [new Recipient(email, user.username)];
+
+          const emailParams = new EmailParams()
+            .setFrom(sentFrom)
+            .setTo(recipients)
+            .setReplyTo(sentFrom)
+            .setSubject("Password Reset Request")
+            .setHtml(`
+              <h2>Password Reset Request</h2>
+              <p>Hello ${user.username},</p>
+              <p>You requested a password reset for your Fitness Portal account.</p>
+              <p>Click the link below to reset your password:</p>
+              <p><a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
+              <p>This link will expire in 1 hour.</p>
+              <p>If you didn't request this password reset, please ignore this email.</p>
+              <p>Best regards,<br>Fitness Portal Team</p>
+            `)
+            .setText(`Password Reset Request\n\nHello ${user.username},\n\nYou requested a password reset for your Fitness Portal account.\n\nClick the link below to reset your password:\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this password reset, please ignore this email.\n\nBest regards,\nFitness Portal Team`);
+
+          await mailerSend.email.send(emailParams);
+          console.log(`Password reset email sent to ${email}`);
+        } catch (emailError: any) {
+          console.error('Error sending password reset email:', emailError);
+          
+          // Check if it's a domain verification error
+          if (emailError.body?.message?.includes('domain must be verified')) {
+            console.log('MailerSend Error: Domain verification required. Please verify your domain in MailerSend dashboard or ensure the recipient email matches your MailerSend registration email for trial accounts.');
+          } else if (emailError.body?.message?.includes('same domain')) {
+            console.log('MailerSend Trial Limitation: You can only send to recipients from the same domain as your registration email during trial period.');
+          }
+          
+          // Still continue to avoid revealing if the email was sent or not
+        }
       } else {
         console.log(`Password reset requested for ${email}, but no email service configured. Reset token: ${resetToken}`);
+        const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+        console.log(`Reset URL: ${resetUrl}`);
       }
       
       res.json({ message: 'If the email exists, a password reset link has been sent.' });
@@ -547,8 +586,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const upcoming = req.query.upcoming === 'true';
       const checkins = upcoming 
-        ? await storage.getUpcomingCheckinsByClientId(clientId)
-        : await storage.getCheckinsByClientId(clientId);
+        ? await storage.getUpcomingCheckinsByClientId(clientId!)
+        : await storage.getCheckinsByClientId(clientId!);
       
       res.json(checkins);
     } catch (error) {
@@ -680,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Device integration routes
   apiRouter.get('/integrations', isAuthenticated, async (req, res) => {
     try {
-      const integrations = await storage.getDeviceIntegrationsByUserId(req.user!.id);
+      const integrations = await storage.getDeviceIntegrationsByUserId((req.user as any).id);
       res.json(integrations);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching integrations' });
@@ -691,12 +730,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const integrationData = {
         ...req.body,
-        userId: req.user!.id
+        userId: (req.user as any).id
       };
       
       // Check if integration already exists
       const existingIntegration = await storage.getDeviceIntegrationByUserId(
-        req.user!.id, 
+        (req.user as any).id, 
         integrationData.provider
       );
       
@@ -722,7 +761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const integrationId = parseInt(req.params.id);
       
       // Check if integration exists and belongs to user
-      const integrations = await storage.getDeviceIntegrationsByUserId(req.user!.id);
+      const integrations = await storage.getDeviceIntegrationsByUserId((req.user as any).id);
       const userOwnsIntegration = integrations.some(i => i.id === integrationId);
       
       if (!userOwnsIntegration) {
@@ -765,8 +804,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a new weight log from the Feelfit data
       const weightLog = {
         clientId: client.id,
-        weight: parseFloat(weight),
-        date: new Date(timestamp),
+        weight: parseFloat(weight).toString(),
+        date: new Date(timestamp).toISOString().split('T')[0],
         notes: 'Recorded from Feelfit scale'
       };
       
