@@ -25,7 +25,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
+import nodemailer from "nodemailer";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -274,54 +274,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store reset token in database
       await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
       
-      // Check if MailerSend is configured
-      if (process.env.MAILERSEND_API_KEY) {
-        try {
-          const mailerSend = new MailerSend({
-            apiKey: process.env.MAILERSEND_API_KEY,
-          });
-
-          const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
-          
-          const sentFrom = new Sender("noreply@trial-z3m5jgrl0184dpyo.mlsender.net", "Fitness Portal");
-          const recipients = [new Recipient(email, user.username)];
-
-          const emailParams = new EmailParams()
-            .setFrom(sentFrom)
-            .setTo(recipients)
-            .setReplyTo(sentFrom)
-            .setSubject("Password Reset Request")
-            .setHtml(`
-              <h2>Password Reset Request</h2>
-              <p>Hello ${user.username},</p>
-              <p>You requested a password reset for your Fitness Portal account.</p>
-              <p>Click the link below to reset your password:</p>
-              <p><a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
-              <p>This link will expire in 1 hour.</p>
-              <p>If you didn't request this password reset, please ignore this email.</p>
-              <p>Best regards,<br>Fitness Portal Team</p>
-            `)
-            .setText(`Password Reset Request\n\nHello ${user.username},\n\nYou requested a password reset for your Fitness Portal account.\n\nClick the link below to reset your password:\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this password reset, please ignore this email.\n\nBest regards,\nFitness Portal Team`);
-
-          await mailerSend.email.send(emailParams);
-          console.log(`Password reset email sent to ${email}`);
-        } catch (emailError: any) {
-          console.error('Error sending password reset email:', emailError);
-          
-          // Check if it's a domain verification error
-          if (emailError.body?.message?.includes('domain must be verified')) {
-            console.log('MailerSend Error: Domain verification required. Please verify your domain in MailerSend dashboard or ensure the recipient email matches your MailerSend registration email for trial accounts.');
-          } else if (emailError.body?.message?.includes('same domain')) {
-            console.log('MailerSend Trial Limitation: You can only send to recipients from the same domain as your registration email during trial period.');
-          }
-          
-          // Still continue to avoid revealing if the email was sent or not
-        }
-      } else {
-        console.log(`Password reset requested for ${email}, but no email service configured. Reset token: ${resetToken}`);
-        const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
-        console.log(`Reset URL: ${resetUrl}`);
-      }
+      // For now, just log the reset URL to console (admin can share it with user)
+      const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+      console.log(`Password reset requested for ${email}`);
+      console.log(`Reset URL: ${resetUrl}`);
+      console.log(`Reset token: ${resetToken}`);
+      console.log(`Token expires at: ${resetTokenExpiry.toISOString()}`)
       
       res.json({ message: 'If the email exists, a password reset link has been sent.' });
     } catch (error) {
