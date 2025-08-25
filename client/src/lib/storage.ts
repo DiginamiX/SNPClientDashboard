@@ -58,7 +58,7 @@ export class StorageService {
     }
   }
 
-  async uploadExerciseVideo(file: File): Promise<{ url: string; thumbnailUrl: string }> {
+  async uploadExerciseVideo(file: File): Promise<{ url: string; thumbnailUrl?: string }> {
     return this.uploadFile(file, 'exercise-videos', {
       maxFileSize: 100 * 1024 * 1024, // 100MB for videos
       allowedTypes: ['video/mp4', 'video/webm', 'video/mov'],

@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
 import { supabase } from '@/lib/supabase'
-import { uploadFile } from '@/lib/storage'
+import { storage } from '@/lib/storage'
 
 interface Exercise {
   id: number
@@ -141,17 +141,15 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
       // Upload video if provided
       if (videoFile) {
         setUploadProgress(25)
-        const videoKey = `exercises/${Date.now()}-video.${videoFile.type.split('/')[1]}`
-        await uploadFile(videoFile, videoKey)
-        video_url = `https://your-cdn-domain.com/${videoKey}` // Replace with your CDN URL
+        const result = await storage.uploadExerciseVideo(videoFile)
+        video_url = result.url
       }
 
       // Upload thumbnail if provided
       if (thumbnailFile) {
         setUploadProgress(50)
-        const thumbnailKey = `exercises/${Date.now()}-thumbnail.${thumbnailFile.type.split('/')[1]}`
-        await uploadFile(thumbnailFile, thumbnailKey)
-        thumbnail_url = `https://your-cdn-domain.com/${thumbnailKey}` // Replace with your CDN URL
+        const result = await storage.uploadFile(thumbnailFile, 'exercise-thumbnails')
+        thumbnail_url = result.url
       }
 
       setUploadProgress(75)
