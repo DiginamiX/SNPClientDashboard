@@ -22,6 +22,7 @@ import CoachWorkouts from "@/pages/coach/Workouts";
 
 // Client pages
 import WorkoutExecution from "@/pages/client/WorkoutExecution";
+import MyWorkouts from "@/pages/client/MyWorkouts";
 
 // Auth pages
 import Login from "@/pages/Login";
@@ -46,6 +47,7 @@ function Router() {
           <Switch>
             {/* Client routes */}
             <Route path="/" component={Dashboard} />
+            <Route path="/my-workouts" component={MyWorkouts} />
             <Route path="/weight-tracking" component={WeightTracking} />
             <Route path="/progress-photos" component={ProgressPhotos} />
             <Route path="/checkins" component={Checkins} />

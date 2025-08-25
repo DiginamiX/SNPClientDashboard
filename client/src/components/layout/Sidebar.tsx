@@ -48,6 +48,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   // Navigation items based on user role
   const clientNavItems = [
     { href: "/", icon: "ri-dashboard-line", label: "Dashboard" },
+    { href: "/my-workouts", icon: "ri-fitness-line", label: "My Workouts" },
     { href: "/weight-tracking", icon: "ri-scales-3-line", label: "Weight Tracking" },
     { href: "/progress-photos", icon: "ri-image-line", label: "Progress Photos" },
     { href: "/checkins", icon: "ri-calendar-check-line", label: "Check-ins" },
@@ -59,9 +60,6 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     { href: "/coach/dashboard", icon: "ri-dashboard-line", label: "Dashboard" },
     { href: "/coach/clients", icon: "ri-team-line", label: "Clients" },
     { href: "/coach/workouts", icon: "ri-fitness-line", label: "Workouts" },
-    { href: "/coach/programs", icon: "ri-calendar-line", label: "Programs" },
-    { href: "/coach/nutrition", icon: "ri-restaurant-line", label: "Nutrition" },
-    { href: "/coach/analytics", icon: "ri-bar-chart-line", label: "Analytics" },
     { href: "/messages", icon: "ri-message-3-line", label: "Messages", badge: 7 },
   ];
 

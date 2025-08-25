@@ -22,6 +22,9 @@ export default function Layout({ children }: LayoutProps) {
       case "/":
         setTitle(isCoach ? "Coach Dashboard" : "Dashboard");
         break;
+      case "/my-workouts":
+        setTitle("My Workouts");
+        break;
       case "/weight-tracking":
         setTitle("Weight Tracking");
         break;
