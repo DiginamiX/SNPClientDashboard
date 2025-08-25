@@ -14,11 +14,11 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
@@ -26,13 +26,13 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useSupabaseAuth();
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: ''
     }
   });
@@ -42,35 +42,10 @@ export default function Login() {
     
     setIsLoggingIn(true);
     try {
-      // Direct fetch login instead of using the hook
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          username: values.username, 
-          password: values.password 
-        }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-      
-      const data = await response.json();
-      
-      // Set the user and redirect
-      window.location.href = '/'; // Force full page reload to ensure session is properly established
-      
+      await signIn(values.email, values.password);
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        title: 'Login failed',
-        description: 'Invalid username or password. Please try again.',
-        variant: 'destructive'
-      });
+      // Error toast is handled by the Supabase auth hook
       setIsLoggingIn(false);
     }
   };
@@ -104,13 +79,14 @@ export default function Login() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter your username"
+                        type="email"
+                        placeholder="Enter your email"
                         {...field}
                         disabled={isLoggingIn}
                       />

@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Message, MessageWithUserDetails, ConversationSummary } from '@/types';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';

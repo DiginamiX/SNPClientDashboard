@@ -29,7 +29,6 @@ import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 
 import Layout from "@/components/layout/Layout";
-import { AuthProvider } from "@/hooks/useAuth";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 import { ThemeProvider } from "next-themes";
 
@@ -76,12 +75,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light">
         <SupabaseAuthProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
         </SupabaseAuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

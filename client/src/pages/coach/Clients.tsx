@@ -1,5 +1,5 @@
 import ClientManagement from "@/components/coach/clients/ClientManagement"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/useSupabaseAuth"
 import { useEffect } from "react"
 import { useLocation } from "wouter"
 

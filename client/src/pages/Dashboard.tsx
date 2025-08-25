@@ -11,7 +11,7 @@ import ProgressPhotos from "@/components/dashboard/ProgressPhotos";
 import UpcomingCheckins from "@/components/dashboard/UpcomingCheckins";
 import NutritionPlan from "@/components/dashboard/NutritionPlan";
 import AssignedWorkouts from "@/components/client/dashboard/AssignedWorkouts";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useSupabaseAuth";
 import { format } from "date-fns";
 
 export default function Dashboard() {

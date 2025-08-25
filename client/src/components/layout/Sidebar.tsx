@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useSupabaseAuth";
 import { cn } from "@/lib/utils";
 
 interface SidebarNavItemProps {

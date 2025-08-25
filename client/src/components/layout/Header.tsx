@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useSupabaseAuth";
 import { 
   DropdownMenu,
   DropdownMenuContent,

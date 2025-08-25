@@ -14,14 +14,13 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  username: z.string().min(3, 'Username must be at least 3 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters')
 }).refine((data) => data.password === data.confirmPassword, {
@@ -33,7 +32,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
-  const { register } = useAuth();
+  const { signUp } = useSupabaseAuth();
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -42,7 +41,6 @@ export default function Register() {
       firstName: '',
       lastName: '',
       email: '',
-      username: '',
       password: '',
       confirmPassword: ''
     }
@@ -52,18 +50,18 @@ export default function Register() {
     setIsRegistering(true);
     try {
       const { confirmPassword, ...userData } = values;
-      await register({ 
-        ...userData,
-        role: 'client', // Default role for new registrations
-        clientData: {} // Empty client data object - will be populated later
-      });
+      await signUp(
+        userData.email,
+        userData.password,
+        'client', // Default role for new registrations
+        {
+          firstName: userData.firstName,
+          lastName: userData.lastName
+        }
+      );
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast({
-        title: 'Registration failed',
-        description: error.message || 'There was a problem with your registration. Please try again.',
-        variant: 'destructive'
-      });
+      // Error toast is handled by the Supabase auth hook
     } finally {
       setIsRegistering(false);
     }
@@ -142,23 +140,6 @@ export default function Register() {
                       <Input
                         type="email"
                         placeholder="john.doe@example.com"
-                        {...field}
-                        disabled={isRegistering}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="johndoe"
                         {...field}
                         disabled={isRegistering}
                       />
