@@ -43,6 +43,29 @@ interface SidebarProps {
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const { user, logout } = useAuth();
+  const isCoach = user?.role === 'admin';
+
+  // Navigation items based on user role
+  const clientNavItems = [
+    { href: "/", icon: "ri-dashboard-line", label: "Dashboard" },
+    { href: "/weight-tracking", icon: "ri-scales-3-line", label: "Weight Tracking" },
+    { href: "/progress-photos", icon: "ri-image-line", label: "Progress Photos" },
+    { href: "/checkins", icon: "ri-calendar-check-line", label: "Check-ins" },
+    { href: "/messages", icon: "ri-message-3-line", label: "Messages", badge: 3 },
+    { href: "/meal-plans", icon: "ri-restaurant-line", label: "Meal Plans" },
+  ];
+
+  const coachNavItems = [
+    { href: "/coach/dashboard", icon: "ri-dashboard-line", label: "Dashboard" },
+    { href: "/coach/clients", icon: "ri-team-line", label: "Clients" },
+    { href: "/coach/workouts", icon: "ri-fitness-line", label: "Workouts" },
+    { href: "/coach/programs", icon: "ri-calendar-line", label: "Programs" },
+    { href: "/coach/nutrition", icon: "ri-restaurant-line", label: "Nutrition" },
+    { href: "/coach/analytics", icon: "ri-bar-chart-line", label: "Analytics" },
+    { href: "/messages", icon: "ri-message-3-line", label: "Messages", badge: 7 },
+  ];
+
+  const navItems = isCoach ? coachNavItems : clientNavItems;
 
   return (
     <div
@@ -67,7 +90,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
             />
           </div>
           <span className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-            Client Portal
+            {isCoach ? 'Coach Portal' : 'Client Portal'}
           </span>
         </div>
         <button
@@ -77,47 +100,27 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           <i className="ri-close-line text-2xl"></i>
         </button>
       </div>
+      
       <nav className="mt-5 px-2 space-y-1">
-        <SidebarNavItem href="/" icon="ri-dashboard-line" label="Dashboard" />
-        <SidebarNavItem
-          href="/weight-tracking"
-          icon="ri-scales-3-line"
-          label="Weight Tracking"
-        />
-        <SidebarNavItem
-          href="/progress-photos"
-          icon="ri-image-line"
-          label="Progress Photos"
-        />
-        <SidebarNavItem
-          href="/checkins"
-          icon="ri-calendar-check-line"
-          label="Check-ins"
-        />
-        <SidebarNavItem
-          href="/messages"
-          icon="ri-message-3-line"
-          label="Messages"
-          badge={3}
-        />
-        <SidebarNavItem
-          href="/meal-plans"
-          icon="ri-restaurant-line"
-          label="Meal Plans"
-        />
+        {navItems.map((item) => (
+          <SidebarNavItem
+            key={item.href}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+            badge={item.badge}
+          />
+        ))}
 
         <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700">
-          <Link href="/settings">
-            <a
-              className="flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-            >
-              <i className="ri-settings-4-line text-xl mr-3"></i>
-              <span>Settings</span>
-            </a>
-          </Link>
+          <SidebarNavItem
+            href="/settings"
+            icon="ri-settings-4-line"
+            label="Settings"
+          />
           <button
             onClick={logout}
-            className="w-full flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="w-full flex items-center px-4 py-3 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
           >
             <i className="ri-logout-box-line text-xl mr-3"></i>
             <span>Logout</span>

@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import StatCard from "@/components/dashboard/StatCard";
-import WeightChart from "@/components/dashboard/WeightChart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MetricCard } from "@/components/ui/metric-card";
+import { LoadingSpinner, Skeleton } from "@/components/ui/loading";
 import WeightLogForm from "@/components/dashboard/WeightLogForm";
 import MessageItem from "@/components/dashboard/MessageItem";
 import ProgressPhotos from "@/components/dashboard/ProgressPhotos";
 import UpcomingCheckins from "@/components/dashboard/UpcomingCheckins";
 import NutritionPlan from "@/components/dashboard/NutritionPlan";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import AssignedWorkouts from "@/components/client/dashboard/AssignedWorkouts";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 
@@ -17,71 +18,44 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [_, setLocation] = useLocation();
 
-  // Mock data for initial render
-  const weightChartData = {
-    labels: [
-      "May 8", "May 9", "May 10", "May 11", "May 12", "May 13", "May 14", 
-      "May 15", "May 16", "May 17", "May 18", "May 19", "May 20", "May 21", 
-      "May 22", "May 23", "May 24", "May 25", "May 26", "May 27", "May 28", 
-      "May 29", "May 30", "May 31", "Jun 1", "Jun 2", "Jun 3", "Jun 4", 
-      "Jun 5", "Jun 6", "Jun 7", "Jun 8"
-    ],
-    dailyWeights: [
-      84.6, 84.8, 84.5, 84.3, 84.2, 84.5, 84.7, 84.4, 84.2, 84.1, 
-      83.9, 84.0, 83.7, 83.9, 84.1, 83.8, 83.6, 83.5, 83.7, 83.8, 
-      83.5, 83.4, 83.2, 83.6, 83.1, 82.9, 82.7, 82.5, 82.4, 82.6, 
-      82.3, 82.4
-    ],
-    weeklyAverages: [
-      null, null, null, null, null, null, 84.5, 84.4, 84.3, 84.2, 84.1, 
-      84.0, 83.9, 84.0, 83.9, 83.8, 83.7, 83.7, 83.6, 83.7, 83.7, 
-      83.6, 83.5, 83.5, 83.4, 83.3, 83.2, 83.1, 83.0, 82.8, 82.6, 82.5
-    ]
-  };
+  // Fetch data with loading states
+  const { data: weightLogs, isLoading: isLoadingWeightLogs } = useQuery({
+    queryKey: ["/api/weight-logs"],
+    refetchInterval: false
+  });
 
-  // Mock data for stats
+  const { data: progressPhotos, isLoading: isLoadingPhotos } = useQuery({
+    queryKey: ["/api/progress-photos"],
+    refetchInterval: false
+  });
+
+  const { data: upcomingCheckins, isLoading: isLoadingCheckins } = useQuery({
+    queryKey: ["/api/checkins", { upcoming: true }],
+    refetchInterval: false
+  });
+
+  const { data: messages, isLoading: isLoadingMessages } = useQuery({
+    queryKey: ["/api/messages"],
+    refetchInterval: false
+  });
+
+  const { data: nutritionPlan, isLoading: isLoadingNutritionPlan } = useQuery({
+    queryKey: ["/api/nutrition-plans", { current: true }],
+    refetchInterval: false
+  });
+
+  // Mock data for demonstration
   const weightStats = {
     currentWeight: 82.4,
-    weeklyChange: 0.8,
+    weeklyChange: -0.8,
     weeklyAverage: 83.1,
-    weeklyAverageChange: 1.2,
+    weeklyAverageChange: -1.2,
     consistency: 86,
     consistencyChange: 4,
     dailyData: [83.2, 83.6, 83.1, 82.9, 82.7, 82.5, 82.4],
     weeklyData: [86.4, 85.2, 84.3, 83.5, 83.1]
   };
 
-  // Fetch weight logs
-  const { data: weightLogs, isLoading: isLoadingWeightLogs } = useQuery({
-    queryKey: ["/api/weight-logs"],
-    refetchInterval: false
-  });
-
-  // Fetch progress photos
-  const { data: progressPhotos, isLoading: isLoadingPhotos } = useQuery({
-    queryKey: ["/api/progress-photos"],
-    refetchInterval: false
-  });
-
-  // Fetch upcoming check-ins
-  const { data: upcomingCheckins, isLoading: isLoadingCheckins } = useQuery({
-    queryKey: ["/api/checkins", { upcoming: true }],
-    refetchInterval: false
-  });
-
-  // Fetch messages
-  const { data: messages, isLoading: isLoadingMessages } = useQuery({
-    queryKey: ["/api/messages"],
-    refetchInterval: false
-  });
-
-  // Fetch current nutrition plan
-  const { data: nutritionPlan, isLoading: isLoadingNutritionPlan } = useQuery({
-    queryKey: ["/api/nutrition-plans", { current: true }],
-    refetchInterval: false
-  });
-
-  // Mock data for photos while loading
   const mockPhotos = [
     {
       id: 1,
@@ -91,25 +65,12 @@ export default function Dashboard() {
     },
     {
       id: 2,
-      date: "2023-05-15",
+      date: "2023-05-15", 
       imageUrl: "https://images.unsplash.com/photo-1594381898411-846e7d193883?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
       category: "Side"
-    },
-    {
-      id: 3,
-      date: "2023-05-01",
-      imageUrl: "https://images.unsplash.com/photo-1573879541250-58ae8b322b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      category: "Back"
-    },
-    {
-      id: 4,
-      date: "2023-04-15",
-      imageUrl: "https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      category: "Front"
     }
   ];
 
-  // Mock data for messages while loading
   const mockMessages = [
     {
       id: 1,
@@ -118,207 +79,211 @@ export default function Dashboard() {
         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
       },
       preview: "Great progress on your weight loss this week! Let's discuss next steps...",
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      time: new Date(Date.now() - 2 * 60 * 60 * 1000),
       unread: true
-    },
-    {
-      id: 2,
-      sender: {
-        name: "Coach Mike",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-      },
-      preview: "I've updated your nutrition plan. Please check and let me know your thoughts.",
-      time: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      unread: false
-    },
-    {
-      id: 3,
-      sender: {
-        name: "Support Team",
-        avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-      },
-      preview: "Your last check-in has been rescheduled to June 15th. Please confirm.",
-      time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
-      unread: false
     }
   ];
-
-  // Mock data for checkins while loading
-  const mockCheckins = [
-    {
-      id: 1,
-      date: "2023-06-15",
-      startTime: "2023-06-15T10:00:00",
-      endTime: "2023-06-15T10:30:00",
-      coachName: "Coach Sarah",
-      status: "confirmed" as const,
-      title: "Monthly Progress Review"
-    },
-    {
-      id: 2,
-      date: "2023-07-13",
-      startTime: "2023-07-13T10:00:00",
-      endTime: "2023-07-13T10:30:00",
-      coachName: "Coach Sarah",
-      status: "scheduled" as const,
-      title: "Monthly Progress Review"
-    }
-  ];
-
-  // Mock data for nutrition plan while loading
-  const mockNutritionPlan = {
-    updatedAt: "2023-05-30T14:30:00",
-    macros: {
-      protein: { name: "Protein", current: 180, target: 180, color: "bg-accent" },
-      carbs: { name: "Carbs", current: 200, target: 220, color: "bg-primary" },
-      fat: { name: "Fat", current: 65, target: 70, color: "bg-secondary" },
-      calories: { name: "Total Calories", current: 2105, target: 2230, color: "bg-blue-400" }
-    },
-    coachNotes: "Great job hitting your protein goals consistently. We'll continue with these macros through the next 2 weeks, then evaluate for potential adjustments based on your progress."
-  };
 
   const getNextCheckInDate = () => {
     if (!isLoadingCheckins && upcomingCheckins?.length > 0) {
       return format(new Date(upcomingCheckins[0].date), "MMMM d, yyyy");
     }
-    return "June 15, 2023"; // Default fallback
+    return "June 15, 2023";
   };
 
   return (
-    <>
-      {/* Welcome Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-              Welcome back, {user?.firstName || "John"}!
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Your next check-in is scheduled for{" "}
-              <span className="font-medium text-primary">{getNextCheckInDate()}</span>
-            </p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Welcome Hero Section */}
+      <Card variant="gradient-orange" className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20" />
+        
+        <CardContent className="relative p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
+                Welcome back, {user?.firstName || "John"}! 👋
+              </h1>
+              <p className="text-white/80 text-lg">
+                Your next check-in is scheduled for{" "}
+                <span className="font-semibold text-white">{getNextCheckInDate()}</span>
+              </p>
+            </div>
+            <div className="mt-6 md:mt-0">
+              <Button 
+                variant="glass" 
+                size="lg" 
+                onClick={() => setLocation("/checkins")}
+                className="text-white border-white/20 hover:bg-white/20"
+              >
+                <i className="ri-calendar-line mr-2"></i>
+                Schedule Check-in
+              </Button>
+            </div>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button className="bg-primary hover:bg-blue-600 text-white" onClick={() => setLocation("/checkins")}>
-              <i className="ri-calendar-line mr-1"></i> Schedule Check-in
-            </Button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Weight and Progress Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Weight Card */}
-        <StatCard
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <MetricCard
           title="Current Weight"
           value={weightStats.currentWeight}
           unit="kg"
           change={{
-            value: `${weightStats.weeklyChange} kg`,
-            type: "decrease"
+            value: `${Math.abs(weightStats.weeklyChange)} kg`,
+            type: weightStats.weeklyChange < 0 ? 'decrease' : 'increase'
           }}
-          data={weightStats.dailyData}
-          link={{
-            text: "View details",
-            href: "/weight-tracking"
-          }}
+          trend={weightStats.dailyData}
+          icon={<i className="ri-scales-3-line text-primary w-5 h-5" />}
+          variant="premium"
         />
 
-        {/* Weekly Average Card */}
-        <StatCard
+        <MetricCard
           title="Weekly Average"
           value={weightStats.weeklyAverage}
           unit="kg"
           change={{
-            value: `${weightStats.weeklyAverageChange} kg`,
-            type: "decrease"
+            value: `${Math.abs(weightStats.weeklyAverageChange)} kg`,
+            type: weightStats.weeklyAverageChange < 0 ? 'decrease' : 'increase'
           }}
-          data={weightStats.weeklyData}
-          link={{
-            text: "View details",
-            href: "/weight-tracking"
-          }}
+          trend={weightStats.weeklyData}
+          icon={<i className="ri-bar-chart-line text-custom-blue-500 w-5 h-5" />}
+          variant="premium"
         />
 
-        {/* Compliance Card */}
-        <StatCard
-          title="Weigh-in Consistency"
+        <MetricCard
+          title="Consistency"
           value={`${weightStats.consistency}%`}
-          unit="compliance"
           change={{
             value: `${weightStats.consistencyChange}%`,
-            type: "increase"
+            type: 'increase'
           }}
-          link={{
-            text: "View details",
-            href: "/weight-tracking"
-          }}
+          icon={<i className="ri-trophy-line text-green-500 w-5 h-5" />}
+          variant="premium"
         />
       </div>
 
-      {/* Weight Tracking & Recent Messages */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      {/* Assigned Workouts Section */}
+      <AssignedWorkouts />
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weight Chart Section */}
         <div className="lg:col-span-2">
-          <WeightChart data={weightChartData} />
+          <Card variant="premium">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <i className="ri-line-chart-line text-primary" />
+                Weight Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingWeightLogs ? (
+                <div className="flex items-center justify-center h-64">
+                  <LoadingSpinner size="lg" variant="orange" />
+                </div>
+              ) : (
+                <div className="h-64 bg-gradient-to-br from-orange-50 to-blue-50 dark:from-orange-950/10 dark:to-blue-950/10 rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Weight chart will render here</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Messages */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Recent Messages</h3>
-              <a href="/messages" className="text-primary text-sm font-medium hover:text-blue-700 dark:hover:text-blue-400">
-                View all
-              </a>
-            </div>
-
-            {mockMessages.map(message => (
-              <MessageItem
-                key={message.id}
-                sender={message.sender}
-                preview={message.preview}
-                time={message.time}
-                unread={message.unread}
+        <Card variant="premium">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <i className="ri-message-2-line text-primary" />
+                Messages
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 onClick={() => setLocation("/messages")}
-              />
-            ))}
-
-            <div className="mt-4">
-              <Button variant="outline" className="w-full" onClick={() => setLocation("/messages")}>
-                <i className="ri-message-2-line mr-1"></i> New Message
+                className="text-primary hover:text-primary/80"
+              >
+                View all
               </Button>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isLoadingMessages ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                {mockMessages.map(message => (
+                  <MessageItem
+                    key={message.id}
+                    sender={message.sender}
+                    preview={message.preview}
+                    time={message.time}
+                    unread={message.unread}
+                    onClick={() => setLocation("/messages")}
+                  />
+                ))}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full mt-4"
+                  onClick={() => setLocation("/messages")}
+                >
+                  <i className="ri-message-2-line mr-2" />
+                  New Message
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Log Weight & Progress Photos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Log Weight Form */}
+      {/* Bottom Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weight Log Form */}
         <WeightLogForm />
 
-        {/* Recent Progress Photos */}
+        {/* Progress Photos */}
         <ProgressPhotos 
           photos={mockPhotos}
           onUploadClick={() => setLocation("/progress-photos")}
         />
       </div>
 
-      {/* Upcoming Check-ins & Nutrition Plan */}
+      {/* Final Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Check-ins */}
         <UpcomingCheckins 
-          checkins={mockCheckins}
+          checkins={[]}
           onViewCalendarClick={() => setLocation("/checkins")}
         />
 
-        {/* Nutrition Plan */}
         <NutritionPlan 
-          plan={mockNutritionPlan}
+          plan={{
+            updatedAt: "2023-05-30T14:30:00",
+            macros: {
+              protein: { name: "Protein", current: 180, target: 180, color: "bg-orange-500" },
+              carbs: { name: "Carbs", current: 200, target: 220, color: "bg-custom-blue-500" },
+              fat: { name: "Fat", current: 65, target: 70, color: "bg-green-500" },
+              calories: { name: "Total Calories", current: 2105, target: 2230, color: "bg-purple-500" }
+            },
+            coachNotes: "Great job hitting your protein goals consistently!"
+          }}
           onViewFullPlanClick={() => setLocation("/meal-plans")}
         />
       </div>
-    </>
+    </div>
   );
 }

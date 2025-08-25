@@ -15,10 +15,12 @@ export default function Layout({ children }: LayoutProps) {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    // Update title based on current path
+    // Update title based on current path and user role
+    const isCoach = user?.role === 'admin';
+    
     switch (location) {
       case "/":
-        setTitle("Dashboard");
+        setTitle(isCoach ? "Coach Dashboard" : "Dashboard");
         break;
       case "/weight-tracking":
         setTitle("Weight Tracking");
@@ -35,10 +37,29 @@ export default function Layout({ children }: LayoutProps) {
       case "/meal-plans":
         setTitle("Meal Plans");
         break;
+      case "/coach":
+      case "/coach/dashboard":
+        setTitle("Coach Dashboard");
+        break;
+      case "/coach/clients":
+        setTitle("Client Management");
+        break;
+      case "/coach/workouts":
+        setTitle("Workout Programming");
+        break;
+      case "/coach/programs":
+        setTitle("Program Builder");
+        break;
+      case "/coach/analytics":
+        setTitle("Analytics");
+        break;
+      case "/settings":
+        setTitle("Settings");
+        break;
       default:
-        setTitle("Dashboard");
+        setTitle(isCoach ? "Coach Dashboard" : "Dashboard");
     }
-  }, [location]);
+  }, [location, user]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
