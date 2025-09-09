@@ -321,9 +321,7 @@ export const coachClients = pgTable("coach_clients", {
 });
 
 // Add unique constraint for coach-client relationships
-export const coachClientsUniqueIndex = pgTable("coach_clients_unique", {}, (table) => ({
-  uniqueCoachClient: unique().on(table.coachId, table.clientId)
-}));
+export const coachClientsUniqueIndex = unique("coach_client_unique").on(coachClients.coachId, coachClients.clientId);
 
 // Define relations
 export const usersRelations = relations(users, ({ many, one }) => ({
