@@ -7,7 +7,14 @@ import {
   checkins, type Checkin, type InsertCheckin,
   messages, type Message, type InsertMessage,
   nutritionPlans, type NutritionPlan, type InsertNutritionPlan,
-  deviceIntegrations, type DeviceIntegration, type InsertDeviceIntegration
+  deviceIntegrations, type DeviceIntegration, type InsertDeviceIntegration,
+  exercises, type Exercise, type InsertExercise,
+  programs, type Program, type InsertProgram,
+  workouts, type Workout, type InsertWorkout,
+  workoutExercises, type InsertWorkoutExercise,
+  clientPrograms, type ClientProgram, type InsertClientProgram,
+  workoutLogs, type WorkoutLog, type InsertWorkoutLog,
+  exerciseLogs, type ExerciseLog, type InsertExerciseLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
@@ -69,6 +76,49 @@ export interface IStorage {
   getUserByResetToken(token: string): Promise<User | undefined>;
   updatePassword(userId: number, hashedPassword: string): Promise<void>;
   clearPasswordResetToken(userId: number): Promise<void>;
+
+  // Exercise operations
+  createExercise(exercise: InsertExercise): Promise<Exercise>;
+  getExercises(): Promise<Exercise[]>;
+  getExercise(id: number): Promise<Exercise | undefined>;
+  updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise>;
+  deleteExercise(id: number): Promise<void>;
+
+  // Program operations
+  createProgram(program: InsertProgram): Promise<Program>;
+  getPrograms(): Promise<Program[]>;
+  getProgramsByCoachId(coachId: number): Promise<Program[]>;
+  getProgram(id: number): Promise<Program | undefined>;
+  updateProgram(id: number, program: Partial<InsertProgram>): Promise<Program>;
+  deleteProgram(id: number): Promise<void>;
+
+  // Workout operations
+  createWorkout(workout: InsertWorkout): Promise<Workout>;
+  getWorkouts(): Promise<Workout[]>;
+  getWorkoutsByProgramId(programId: number): Promise<Workout[]>;
+  getWorkout(id: number): Promise<Workout | undefined>;
+  updateWorkout(id: number, workout: Partial<InsertWorkout>): Promise<Workout>;
+  deleteWorkout(id: number): Promise<void>;
+
+  // Workout exercise operations
+  createWorkoutExercise(workoutExercise: InsertWorkoutExercise): Promise<any>;
+  getWorkoutExercisesByWorkoutId(workoutId: number): Promise<any[]>;
+  deleteWorkoutExercisesByWorkoutId(workoutId: number): Promise<void>;
+
+  // Client program operations
+  assignProgramToClient(clientProgram: InsertClientProgram): Promise<ClientProgram>;
+  getClientPrograms(clientId: number): Promise<ClientProgram[]>;
+  getClientProgramsByCoachId(coachId: number): Promise<ClientProgram[]>;
+  updateClientProgramStatus(id: number, status: string): Promise<ClientProgram>;
+
+  // Workout log operations
+  createWorkoutLog(workoutLog: InsertWorkoutLog): Promise<WorkoutLog>;
+  getWorkoutLogsByClientId(clientId: number): Promise<WorkoutLog[]>;
+  updateWorkoutLog(id: number, workoutLog: Partial<InsertWorkoutLog>): Promise<WorkoutLog>;
+
+  // Exercise log operations
+  createExerciseLog(exerciseLog: InsertExerciseLog): Promise<ExerciseLog>;
+  getExerciseLogsByWorkoutLogId(workoutLogId: number): Promise<ExerciseLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -378,6 +428,164 @@ export class DatabaseStorage implements IStorage {
         resetTokenExpiry: null 
       })
       .where(eq(users.id, userId));
+  }
+
+  // Exercise operations
+  async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    const [created] = await db.insert(exercises).values(exercise).returning();
+    return created;
+  }
+
+  async getExercises(): Promise<Exercise[]> {
+    return db.select().from(exercises).orderBy(exercises.name);
+  }
+
+  async getExercise(id: number): Promise<Exercise | undefined> {
+    const [exercise] = await db.select().from(exercises).where(eq(exercises.id, id));
+    return exercise;
+  }
+
+  async updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise> {
+    const [updated] = await db
+      .update(exercises)
+      .set(exercise)
+      .where(eq(exercises.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteExercise(id: number): Promise<void> {
+    await db.delete(exercises).where(eq(exercises.id, id));
+  }
+
+  // Program operations
+  async createProgram(program: InsertProgram): Promise<Program> {
+    const [created] = await db.insert(programs).values(program).returning();
+    return created;
+  }
+
+  async getPrograms(): Promise<Program[]> {
+    return db.select().from(programs).orderBy(programs.name);
+  }
+
+  async getProgramsByCoachId(coachId: number): Promise<Program[]> {
+    return db.select().from(programs).where(eq(programs.coachId, coachId)).orderBy(programs.name);
+  }
+
+  async getProgram(id: number): Promise<Program | undefined> {
+    const [program] = await db.select().from(programs).where(eq(programs.id, id));
+    return program;
+  }
+
+  async updateProgram(id: number, program: Partial<InsertProgram>): Promise<Program> {
+    const [updated] = await db
+      .update(programs)
+      .set(program)
+      .where(eq(programs.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProgram(id: number): Promise<void> {
+    await db.delete(programs).where(eq(programs.id, id));
+  }
+
+  // Workout operations
+  async createWorkout(workout: InsertWorkout): Promise<Workout> {
+    const [created] = await db.insert(workouts).values(workout).returning();
+    return created;
+  }
+
+  async getWorkouts(): Promise<Workout[]> {
+    return db.select().from(workouts).orderBy(workouts.name);
+  }
+
+  async getWorkoutsByProgramId(programId: number): Promise<Workout[]> {
+    return db.select().from(workouts).where(eq(workouts.programId, programId)).orderBy(workouts.dayNumber);
+  }
+
+  async getWorkout(id: number): Promise<Workout | undefined> {
+    const [workout] = await db.select().from(workouts).where(eq(workouts.id, id));
+    return workout;
+  }
+
+  async updateWorkout(id: number, workout: Partial<InsertWorkout>): Promise<Workout> {
+    const [updated] = await db
+      .update(workouts)
+      .set(workout)
+      .where(eq(workouts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWorkout(id: number): Promise<void> {
+    await db.delete(workouts).where(eq(workouts.id, id));
+  }
+
+  // Workout exercise operations
+  async createWorkoutExercise(workoutExercise: InsertWorkoutExercise): Promise<any> {
+    const [created] = await db.insert(workoutExercises).values(workoutExercise).returning();
+    return created;
+  }
+
+  async getWorkoutExercisesByWorkoutId(workoutId: number): Promise<any[]> {
+    return db.select().from(workoutExercises).where(eq(workoutExercises.workoutId, workoutId)).orderBy(workoutExercises.orderIndex);
+  }
+
+  async deleteWorkoutExercisesByWorkoutId(workoutId: number): Promise<void> {
+    await db.delete(workoutExercises).where(eq(workoutExercises.workoutId, workoutId));
+  }
+
+  // Client program operations
+  async assignProgramToClient(clientProgram: InsertClientProgram): Promise<ClientProgram> {
+    const [created] = await db.insert(clientPrograms).values(clientProgram).returning();
+    return created;
+  }
+
+  async getClientPrograms(clientId: number): Promise<ClientProgram[]> {
+    return db.select().from(clientPrograms).where(eq(clientPrograms.clientId, clientId)).orderBy(desc(clientPrograms.startDate));
+  }
+
+  async getClientProgramsByCoachId(coachId: number): Promise<ClientProgram[]> {
+    return db.select().from(clientPrograms).where(eq(clientPrograms.assignedBy, coachId)).orderBy(desc(clientPrograms.startDate));
+  }
+
+  async updateClientProgramStatus(id: number, status: string): Promise<ClientProgram> {
+    const [updated] = await db
+      .update(clientPrograms)
+      .set({ status: status as any })
+      .where(eq(clientPrograms.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Workout log operations
+  async createWorkoutLog(workoutLog: InsertWorkoutLog): Promise<WorkoutLog> {
+    const [created] = await db.insert(workoutLogs).values(workoutLog).returning();
+    return created;
+  }
+
+  async getWorkoutLogsByClientId(clientId: number): Promise<WorkoutLog[]> {
+    return db.select().from(workoutLogs).where(eq(workoutLogs.clientId, clientId)).orderBy(desc(workoutLogs.date));
+  }
+
+  async updateWorkoutLog(id: number, workoutLog: Partial<InsertWorkoutLog>): Promise<WorkoutLog> {
+    const [updated] = await db
+      .update(workoutLogs)
+      .set(workoutLog)
+      .where(eq(workoutLogs.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Exercise log operations
+  async createExerciseLog(exerciseLog: InsertExerciseLog): Promise<ExerciseLog> {
+    const [created] = await db.insert(exerciseLogs).values(exerciseLog).returning();
+    return created;
+  }
+
+  async getExerciseLogsByWorkoutLogId(workoutLogId: number): Promise<ExerciseLog[]> {
+    return db.select().from(exerciseLogs).where(eq(exerciseLogs.workoutLogId, workoutLogId)).orderBy(exerciseLogs.orderIndex);
   }
 }
 

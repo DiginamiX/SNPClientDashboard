@@ -12,6 +12,13 @@ import {
   insertCheckinSchema,
   insertMessageSchema,
   insertNutritionPlanSchema,
+  insertExerciseSchema,
+  insertProgramSchema,
+  insertWorkoutSchema,
+  insertWorkoutExerciseSchema,
+  insertClientProgramSchema,
+  insertWorkoutLogSchema,
+  insertExerciseLogSchema,
   users
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -1174,6 +1181,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Feelfit webhook error:', error);
       res.status(500).json({ message: 'Server error processing Feelfit data' });
+    }
+  });
+
+  // Exercise management routes
+  apiRouter.get('/exercises', isAuthenticated, async (req, res) => {
+    try {
+      const exercises = await storage.getExercises();
+      res.json(exercises);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching exercises' });
+    }
+  });
+
+  apiRouter.post('/exercises', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can create exercises' });
+      }
+
+      const exerciseData = insertExerciseSchema.parse({
+        ...req.body,
+        createdBy: user.id
+      });
+
+      const exercise = await storage.createExercise(exerciseData);
+      res.status(201).json(exercise);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error creating exercise' });
+    }
+  });
+
+  // Program management routes
+  apiRouter.get('/programs', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      let programs;
+
+      if (user.role === 'admin') {
+        programs = await storage.getProgramsByCoachId(user.id);
+      } else {
+        programs = await storage.getPrograms();
+      }
+
+      res.json(programs);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching programs' });
+    }
+  });
+
+  apiRouter.post('/programs', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can create programs' });
+      }
+
+      const programData = insertProgramSchema.parse({
+        ...req.body,
+        coachId: user.id
+      });
+
+      const program = await storage.createProgram(programData);
+      res.status(201).json(program);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error creating program' });
+    }
+  });
+
+  // Program assignment routes
+  apiRouter.post('/programs/:id/assign', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can assign programs' });
+      }
+
+      const programId = parseInt(req.params.id);
+      const { clientIds, startDate, notes } = req.body;
+
+      if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
+        return res.status(400).json({ message: 'Client IDs are required' });
+      }
+
+      const assignments = [];
+      for (const clientId of clientIds) {
+        const assignmentData = insertClientProgramSchema.parse({
+          clientId: parseInt(clientId),
+          programId,
+          assignedBy: user.id,
+          startDate,
+          notes
+        });
+
+        const assignment = await storage.assignProgramToClient(assignmentData);
+        assignments.push(assignment);
+      }
+
+      res.status(201).json(assignments);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error assigning program' });
+    }
+  });
+
+  // Workout management routes
+  apiRouter.get('/workouts', isAuthenticated, async (req, res) => {
+    try {
+      const programId = req.query.programId as string;
+      let workouts;
+
+      if (programId) {
+        workouts = await storage.getWorkoutsByProgramId(parseInt(programId));
+      } else {
+        workouts = await storage.getWorkouts();
+      }
+
+      res.json(workouts);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching workouts' });
+    }
+  });
+
+  apiRouter.post('/workouts', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can create workouts' });
+      }
+
+      const { workout, exercises } = req.body;
+
+      const workoutData = insertWorkoutSchema.parse(workout);
+      const createdWorkout = await storage.createWorkout(workoutData);
+
+      // Add exercises to the workout
+      if (exercises && Array.isArray(exercises)) {
+        for (const exercise of exercises) {
+          const exerciseData = insertWorkoutExerciseSchema.parse({
+            ...exercise,
+            workoutId: createdWorkout.id
+          });
+          await storage.createWorkoutExercise(exerciseData);
+        }
+      }
+
+      res.status(201).json(createdWorkout);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error creating workout' });
+    }
+  });
+
+  // Client program assignments (for client view)
+  apiRouter.get('/client-programs', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      let clientPrograms;
+
+      if (user.role === 'admin') {
+        // Coach viewing all their assigned programs
+        clientPrograms = await storage.getClientProgramsByCoachId(user.id);
+      } else {
+        // Client viewing their own programs
+        clientPrograms = await storage.getClientPrograms(user.id);
+      }
+
+      res.json(clientPrograms);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching client programs' });
+    }
+  });
+
+  // Workout log management
+  apiRouter.post('/workout-logs', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const workoutLogData = insertWorkoutLogSchema.parse({
+        ...req.body,
+        clientId: user.id
+      });
+
+      const workoutLog = await storage.createWorkoutLog(workoutLogData);
+      res.status(201).json(workoutLog);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error creating workout log' });
+    }
+  });
+
+  apiRouter.get('/workout-logs', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const clientId = parseInt(req.query.clientId as string) || user.id;
+
+      // Check authorization
+      if (user.role !== 'admin' && clientId !== user.id) {
+        return res.status(403).json({ message: 'Unauthorized to access these workout logs' });
+      }
+
+      const workoutLogs = await storage.getWorkoutLogsByClientId(clientId);
+      res.json(workoutLogs);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching workout logs' });
     }
   });
 
