@@ -122,11 +122,11 @@ export default function AssignedWorkouts() {
       if (error) throw error
 
       // Transform data to match interface
-      const transformedData = data?.map(assignment => ({
+      const transformedData = data?.map((assignment: any) => ({
         ...assignment,
         workout: {
           ...assignment.workouts,
-          exercises: assignment.workouts.workout_exercises.map(we => ({
+          exercises: assignment.workouts.workout_exercises.map((we: any) => ({
             ...we,
             exercise: we.exercises
           }))
@@ -149,22 +149,6 @@ export default function AssignedWorkouts() {
     setLocation(`/workout/${assignment.id}`)
   }
 
-  const getDateLabel = (dateString: string) => {
-    const date = new Date(dateString)
-    if (isToday(date)) return 'Today'
-    if (isTomorrow(date)) return 'Tomorrow'
-    return format(date, 'MMM d')
-  }
-
-  const getUniqueExercises = (workout: Workout) => {
-    const uniqueExercises = new Map()
-    workout.exercises.forEach(ex => {
-      if (!uniqueExercises.has(ex.exercise.name)) {
-        uniqueExercises.set(ex.exercise.name, ex.exercise)
-      }
-    })
-    return Array.from(uniqueExercises.values())
-  }
 
   // Group assignments by date
   const groupedAssignments = assignments.reduce((groups, assignment) => {
@@ -273,6 +257,24 @@ interface WorkoutCardProps {
 
 function WorkoutCard({ assignment, onStart, onContinue, priority = false, past = false }: WorkoutCardProps) {
   const { workout, status, scheduled_date, workout_session } = assignment
+  
+  const getUniqueExercises = (workout: Workout) => {
+    const uniqueExercises = new Map()
+    workout.exercises.forEach(ex => {
+      if (!uniqueExercises.has(ex.exercise.name)) {
+        uniqueExercises.set(ex.exercise.name, ex.exercise)
+      }
+    })
+    return Array.from(uniqueExercises.values())
+  }
+
+  const getDateLabel = (dateString: string) => {
+    const date = new Date(dateString)
+    if (isToday(date)) return 'Today'
+    if (isTomorrow(date)) return 'Tomorrow'
+    return format(date, 'MMM d')
+  }
+  
   const uniqueExercises = getUniqueExercises(workout)
   const totalSets = workout.exercises.reduce((total, ex) => total + ex.sets, 0)
   
@@ -392,7 +394,7 @@ function WorkoutCard({ assignment, onStart, onContinue, priority = false, past =
             <div className="flex items-center gap-2 mb-4">
               <span className="text-sm font-medium">Exercises:</span>
               <div className="flex flex-wrap gap-1">
-                {uniqueExercises.slice(0, 3).map((exercise, index) => (
+                {uniqueExercises.slice(0, 3).map((exercise: any, index: number) => (
                   <Badge key={exercise.id} variant="secondary" className="text-xs">
                     {exercise.name}
                   </Badge>
