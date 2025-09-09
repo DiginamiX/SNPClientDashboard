@@ -28,6 +28,7 @@ import MyWorkouts from "./pages/client/MyWorkouts";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
+import EmailConfirmation from "./pages/EmailConfirmation";
 
 import Layout from "./components/layout/Layout";
 import { SupabaseAuthProvider } from "./hooks/useSupabaseAuth";
@@ -35,13 +36,14 @@ import { ThemeProvider } from "next-themes";
 
 function Router() {
   const [location] = useLocation();
-  const isAuthPage = location === "/login" || location === "/register" || location === "/forgot-password";
+  const isAuthPage = location === "/login" || location === "/register" || location === "/forgot-password" || location === "/email-confirmation";
 
   return (
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/email-confirmation" component={EmailConfirmation} />
       {isAuthPage ? null : (
         <Layout>
           <Switch>

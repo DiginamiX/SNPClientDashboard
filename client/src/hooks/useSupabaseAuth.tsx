@@ -105,10 +105,27 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       
       if (error) throw error
       
-      toast({
-        title: 'Account created!',
-        description: 'Please check your email to verify your account.',
-      })
+      // If user is immediately signed in (email confirmation disabled)
+      if (data.user && data.session) {
+        // Redirect based on role
+        if (role === 'admin') {
+          setLocation('/coach/dashboard')
+        } else {
+          setLocation('/')
+        }
+        
+        toast({
+          title: 'Welcome!',
+          description: 'Your account has been created and you are now signed in.',
+        })
+      } else {
+        // Email confirmation required
+        setLocation('/email-confirmation')
+        toast({
+          title: 'Account created!',
+          description: 'Please check your email to verify your account.',
+        })
+      }
     } catch (error: any) {
       console.error('Signup error:', error)
       toast({
