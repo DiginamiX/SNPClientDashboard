@@ -20,14 +20,8 @@ import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import session from "express-session";
-import createMemoryStore from "memorystore";
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import nodemailer from "nodemailer";
 import rateLimit from "express-rate-limit";
+import { createClient } from '@supabase/supabase-js';
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -38,7 +32,7 @@ if (!fs.existsSync(uploadDir)) {
 // Configure multer for progress photo uploads
 const storage1 = multer.diskStorage({
   destination: (req, file, cb) => {
-    const userId = (req.user as any)?.id || 'unknown';
+    const userId = (req as any).user?.id || 'unknown';
     const userDir = path.join(uploadDir, userId.toString());
     if (!fs.existsSync(userDir)) {
       fs.mkdirSync(userDir, { recursive: true });
@@ -69,8 +63,11 @@ const upload = multer({
   }
 });
 
-// Set up memory store for sessions
-const MemoryStore = createMemoryStore(session);
+// Supabase client setup for JWT verification
+const supabaseUrl = process.env.SUPABASE_URL || 'https://vdykrlyybwwbcqqcgjbp.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkeWtybHl5Ynd3YmNxcWNnamJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEzNjY3MCwiZXhwIjoyMDcxNzEyNjcwfQ.fYLdoULJWBQyrmH4DFLnq8CtHhq5xE4VChNsJHKJz2k';
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Rate limiting configuration
 const authRateLimit = rateLimit({
@@ -106,75 +103,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Set up authentication
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'secret-key-snp-portal',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: 'lax' // Better mobile compatibility
-    },
-    store: new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    }),
-  }));
-
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  // Configure passport local strategy
-  passport.use(new LocalStrategy(async (username, password, done) => {
-    try {
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username or password' });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return done(null, false, { message: 'Incorrect username or password' });
-      }
-      
-      return done(null, user);
-    } catch (err) {
-      return done(err);
-    }
-  }));
-
-  // Serialize and deserialize user for sessions
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (err) {
-      done(err);
-    }
-  });
+  // No session setup needed - using Supabase JWT tokens
 
   // Create API router
   const apiRouter = Router();
 
-  // Authentication middleware for protected routes
-  const isAuthenticated = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated()) {
-      return next();
+  // Supabase JWT Authentication middleware
+  const isAuthenticated = async (req: Request, res: Response, next: any) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Unauthorized - No token provided' });
+      }
+
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Verify the JWT token with Supabase
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      if (error || !user) {
+        console.log('❌ Auth verification failed:', error?.message);
+        return res.status(401).json({ message: 'Unauthorized - Invalid token' });
+      }
+
+      // Attach user info to request
+      (req as any).user = {
+        id: user.id,
+        email: user.email,
+        role: user.user_metadata?.role || 'client',
+        firstName: user.user_metadata?.first_name,
+        lastName: user.user_metadata?.last_name
+      };
+
+      console.log('✅ User authenticated:', { 
+        id: user.id, 
+        email: user.email, 
+        role: user.user_metadata?.role 
+      });
+
+      next();
+    } catch (error) {
+      console.log('❌ Auth middleware error:', error);
+      res.status(401).json({ message: 'Unauthorized - Auth error' });
     }
-    res.status(401).json({ message: 'Unauthorized' });
   };
 
   // Admin-only middleware
-  const isAdmin = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated() && (req.user as any).role === 'admin') {
+  const isAdmin = async (req: Request, res: Response, next: any) => {
+    const user = (req as any).user;
+    if (user && user.role === 'admin') {
       return next();
     }
-    res.status(403).json({ message: 'Forbidden' });
+    res.status(403).json({ message: 'Forbidden - Admin access required' });
   };
 
   // Apply rate limiting to auth routes
