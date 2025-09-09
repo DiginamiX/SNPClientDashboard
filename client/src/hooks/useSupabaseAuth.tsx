@@ -282,13 +282,16 @@ export function useSupabaseAuth() {
 export function useAuth() {
   const supabaseAuth = useSupabaseAuth()
   
+  // Ensure role is properly mapped
+  const userRole = supabaseAuth.role || supabaseAuth.user?.user_metadata?.role || 'client'
+  
   return {
     user: supabaseAuth.user ? {
       id: supabaseAuth.user.id,
       email: supabaseAuth.user.email,
       firstName: supabaseAuth.user.user_metadata?.first_name || supabaseAuth.profile?.first_name,
       lastName: supabaseAuth.user.user_metadata?.last_name || supabaseAuth.profile?.last_name,
-      role: supabaseAuth.role,
+      role: userRole,
       avatar: supabaseAuth.profile?.avatar
     } : null,
     loading: supabaseAuth.loading,
@@ -304,6 +307,13 @@ export function useAuth() {
         }
       )
     },
-    logout: supabaseAuth.signOut
+    logout: async () => {
+      try {
+        await supabaseAuth.signOut()
+      } catch (error) {
+        console.error('Logout error:', error)
+        throw error
+      }
+    }
   }
 }

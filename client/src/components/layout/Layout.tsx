@@ -71,12 +71,15 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [location, user]);
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated, or redirect coaches to their dashboard
   useEffect(() => {
     if (!loading && !user) {
       setLocation("/login");
+    } else if (!loading && user && user.role === 'admin' && location === '/') {
+      // Redirect coaches from client dashboard to coach dashboard
+      setLocation("/coach/dashboard");
     }
-  }, [user, loading, setLocation]);
+  }, [user, loading, setLocation, location]);
 
   if (loading) {
     return (
