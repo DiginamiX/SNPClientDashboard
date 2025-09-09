@@ -11,19 +11,19 @@ import ProgressPhotos from "@/components/dashboard/ProgressPhotos";
 import UpcomingCheckins from "@/components/dashboard/UpcomingCheckins";
 import NutritionPlan from "@/components/dashboard/NutritionPlan";
 import AssignedWorkouts from "@/components/client/dashboard/AssignedWorkouts";
-import { useAuth } from "@/hooks/useAuth";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { format } from "date-fns";
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useSupabaseAuth();
   const [_, setLocation] = useLocation();
 
   // Redirect admin users to coach dashboard
   useEffect(() => {
-    if (!loading && user && user.role === 'admin') {
+    if (!loading && user && role === 'admin') {
       setLocation('/coach');
     }
-  }, [user, loading, setLocation]);
+  }, [user, loading, role, setLocation]);
 
   if (loading) {
     return (
@@ -33,7 +33,7 @@ export default function Dashboard() {
     );
   }
 
-  if (user && user.role === 'admin') {
+  if (user && role === 'admin') {
     return null; // Will redirect in useEffect
   }
 
@@ -132,7 +132,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-                Welcome back, {user?.firstName || user?.first_name || "User"}! 👋
+                Welcome back, {user?.user_metadata?.first_name || user?.user_metadata?.firstName || "User"}! 👋
               </h1>
               <p className="text-white/80 text-lg">
                 Your next check-in is scheduled for{" "}

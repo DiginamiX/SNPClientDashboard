@@ -80,22 +80,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      // Try to get user profile from our users table
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single()
-      
-      if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-        console.error('Error fetching user profile:', error)
-        return
-      }
+      // For now, derive role from user metadata until database is set up
+      const user = authState.user
+      const role = user?.user_metadata?.role || 'client'
       
       setAuthState(prev => ({ 
         ...prev, 
-        role: profile?.role || null,
-        profile: profile || null
+        role: role as 'client' | 'admin',
+        profile: user?.user_metadata || null
       }))
     } catch (error) {
       console.error('Error in fetchUserProfile:', error)
@@ -104,30 +96,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'client' | 'admin', additionalData?: any) => {
     try {
-      const { data, error } = await auth.signUp(email, password, {
-        role,
-        ...additionalData
+      const { data, error } = await auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role,
+            first_name: additionalData?.firstName || '',
+            last_name: additionalData?.lastName || '',
+            username: email.split('@')[0]
+          }
+        }
       })
       
       if (error) throw error
-      
-      // If signup successful, create user profile
-      if (data.user && !error) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            username: email.split('@')[0], // Default username from email
-            first_name: additionalData?.firstName || '',
-            last_name: additionalData?.lastName || '',
-            role: role
-          })
-        
-        if (profileError) {
-          console.error('Error creating user profile:', profileError)
-        }
-      }
       
       toast({
         title: 'Account created!',
@@ -146,12 +128,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await auth.signIn(email, password)
+      const { data, error } = await auth.signInWithPassword({
+        email,
+        password
+      })
       
       if (error) throw error
       
       // Redirect based on role
-      const userRole = data.user?.user_metadata?.role || authState.role
+      const userRole = data.user?.user_metadata?.role || 'client'
       if (userRole === 'admin') {
         setLocation('/coach/dashboard')
       } else {
@@ -220,15 +205,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       if (!authState.user) throw new Error('No user logged in')
       
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', authState.user.id)
+      const { error } = await auth.updateUser({
+        data: {
+          ...authState.user.user_metadata,
+          ...updates
+        }
+      })
       
       if (error) throw error
       
-      // Refresh profile
-      await fetchUserProfile(authState.user.id)
+      // Update local state
+      setAuthState(prev => ({
+        ...prev,
+        profile: { ...prev.profile, ...updates }
+      }))
       
       toast({
         title: 'Profile updated',
@@ -272,14 +262,14 @@ export function useAuth() {
   const supabaseAuth = useSupabaseAuth()
   
   return {
-    user: supabaseAuth.profile || {
-      id: supabaseAuth.user?.id,
-      email: supabaseAuth.user?.email,
-      firstName: supabaseAuth.profile?.first_name,
-      lastName: supabaseAuth.profile?.last_name,
+    user: supabaseAuth.user ? {
+      id: supabaseAuth.user.id,
+      email: supabaseAuth.user.email,
+      firstName: supabaseAuth.user.user_metadata?.first_name || supabaseAuth.profile?.first_name,
+      lastName: supabaseAuth.user.user_metadata?.last_name || supabaseAuth.profile?.last_name,
       role: supabaseAuth.role,
       avatar: supabaseAuth.profile?.avatar
-    },
+    } : null,
     loading: supabaseAuth.loading,
     login: supabaseAuth.signIn,
     register: async (userData: any) => {
