@@ -18,6 +18,13 @@ export default function Layout({ children }: LayoutProps) {
     // Update title based on current path and user role
     const isCoach = user?.role === 'admin';
     
+    console.log('🏠 Layout role check:', {
+      userRole: user?.role,
+      isCoach,
+      location,
+      user: user ? { id: user.id, email: user.email, role: user.role } : null
+    })
+    
     switch (location) {
       case "/":
         setTitle(isCoach ? "Coach Dashboard" : "Dashboard");

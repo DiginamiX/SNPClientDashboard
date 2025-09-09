@@ -80,9 +80,22 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      // For now, derive role from user metadata until database is set up
-      const user = authState.user
+      // Get fresh user data from Supabase to ensure we have latest metadata
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) {
+        console.error('Error fetching user:', error)
+        return
+      }
+      
       const role = user?.user_metadata?.role || 'client'
+      
+      console.log('🔍 Role check:', {
+        userId,
+        email: user?.email,
+        role,
+        metadata: user?.user_metadata,
+        isAdmin: role === 'admin'
+      })
       
       setAuthState(prev => ({ 
         ...prev, 
