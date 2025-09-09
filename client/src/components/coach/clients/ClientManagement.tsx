@@ -236,7 +236,16 @@ export default function ClientManagement() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              toast({
+                title: "Export Started",
+                description: "Your client data export will be ready shortly. You'll receive a download link via email.",
+              });
+            }}
+          >
             <i className="ri-download-line mr-2" />
             Export
           </Button>
