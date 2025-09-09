@@ -81,47 +81,37 @@ export default function MyWorkouts() {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('workout_assignments')
-        .select(`
-          id,
-          workout_id,
-          scheduled_date,
-          status,
-          notes,
-          assigned_by,
-          workouts!inner (
-            id,
-            name,
-            description,
-            estimated_duration,
-            difficulty_rating,
-            workout_type,
-            workout_exercises (
-              id,
-              sets,
-              reps,
-              exercises (
-                id,
-                name,
-                muscle_groups,
-                equipment,
-                thumbnail_url
-              )
-            )
-          ),
-          workout_sessions (
-            id,
-            status,
-            start_time
-          )
-        `)
-        .eq('client_id', user.id)
-        .order('scheduled_date', { ascending: false });
+      const response = await fetch('/api/workout-logs', {
+        credentials: 'include'
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to fetch workout assignments');
+      }
 
-      setAssignments(data || []);
+      const workoutLogs = await response.json();
+      
+      // Transform workout logs to match the expected interface
+      const transformedAssignments = workoutLogs.map((log: any) => ({
+        id: log.id,
+        workout_id: log.workoutId,
+        scheduled_date: log.date,
+        status: log.status === 'planned' ? 'pending' : log.status,
+        notes: log.notes,
+        assigned_by: 'coach',
+        workouts: {
+          id: log.workout?.id || log.workoutId,
+          name: log.workout?.name || 'Assigned Workout',
+          description: log.workout?.description || log.notes,
+          estimated_duration: log.workout?.estimatedDuration,
+          difficulty_rating: null,
+          workout_type: 'strength',
+          workout_exercises: log.workout?.workout_exercises || []
+        },
+        workout_sessions: []
+      }));
+
+      setAssignments(transformedAssignments);
     } catch (error) {
       console.error('Error fetching workout assignments:', error);
     } finally {

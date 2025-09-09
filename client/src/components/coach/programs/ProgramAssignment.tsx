@@ -122,24 +122,23 @@ export default function ProgramAssignment({ programId, open, onClose, onSuccess 
 
     setLoading(true)
     try {
-      const assignments = selectedClients.map(clientId => ({
-        client_id: clientId,
-        program_id: programId,
-        assigned_by: user.id,
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        status: 'active' as const,
-        notes: assignmentNotes
-      }))
+      const response = await fetch(`/api/programs/${programId}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          clientIds: selectedClients,
+          startDate: format(startDate, 'yyyy-MM-dd'),
+          notes: assignmentNotes
+        })
+      })
 
-      // Insert program assignments
-      const { error } = await supabase
-        .from('client_programs')
-        .insert(assignments)
-
-      if (error) throw error
-
-      // TODO: Send notifications to clients
-      // TODO: Create initial workout assignments based on program schedule
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to assign program')
+      }
 
       onSuccess()
     } catch (error) {

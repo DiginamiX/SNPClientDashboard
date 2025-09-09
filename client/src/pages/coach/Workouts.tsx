@@ -109,10 +109,9 @@ export default function CoachWorkouts() {
             <Calendar className="w-4 h-4" />
             Programs
           </TabsTrigger>
-          <TabsTrigger value="assignments" className="gap-2" disabled>
+          <TabsTrigger value="assignments" className="gap-2">
             <Users className="w-4 h-4" />
             Assignments
-            <Badge variant="secondary" className="ml-2 text-xs">Coming Soon</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -139,27 +138,27 @@ export default function CoachWorkouts() {
             <CardContent>
               <div className="text-center py-12">
                 <div className="max-w-md mx-auto">
-                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Assignment System Coming Soon</h3>
+                  <Users className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Assignment System Active!</h3>
                   <p className="text-muted-foreground mb-6">
-                    Assign and track workout programs for your clients
+                    Assign workouts and programs to your clients from the Workout Builder and Program sections above.
                   </p>
                   <div className="space-y-2 text-left">
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Bulk program assignments</span>
+                      <span>✅ Individual workout assignments</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Real-time progress tracking</span>
+                      <span>✅ Program assignments</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Automated check-ins</span>
+                      <span>✅ Client workout tracking</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Performance analytics</span>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span>🚧 Real-time progress dashboard (coming soon)</span>
                     </div>
                   </div>
                 </div>

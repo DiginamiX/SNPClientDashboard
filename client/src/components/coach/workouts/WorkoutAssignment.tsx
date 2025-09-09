@@ -147,27 +147,60 @@ export default function WorkoutAssignment({ workout, open, onClose, onSuccess }:
 
     setLoading(true)
     try {
-      // First, we need to get the workout ID that was created
-      // For now, let's create a simple assignment without a specific workout ID
-      // In a real implementation, this would come from the saved workout
+      // First save the workout to get an ID, then create workout logs for each client
+      const workoutData = {
+        name: workout.name,
+        description: workout.description,
+        instructions: workout.instructions,
+        estimatedDuration: workout.estimatedDuration
+      }
 
-      const assignments = selectedClients.map(clientId => ({
-        client_id: clientId,
-        coach_id: user.id,
-        scheduled_date: scheduledDate || new Date(),
-        status: 'assigned' as const,
-        notes: assignmentNotes
-      }))
+      // Create the workout
+      const workoutResponse = await fetch('/api/workouts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          workout: workoutData,
+          exercises: workout.exercises.map(ex => ({
+            exerciseId: ex.exercise.id,
+            sets: ex.sets,
+            reps: ex.reps,
+            weight: ex.weight,
+            restSeconds: ex.rest_seconds,
+            notes: ex.notes,
+            orderIndex: ex.order_index
+          }))
+        })
+      })
 
-      // Insert workout assignments
-      const { error } = await supabase
-        .from('workout_assignments')
-        .insert(assignments)
+      if (!workoutResponse.ok) {
+        throw new Error('Failed to save workout')
+      }
 
-      if (error) throw error
+      const savedWorkout = await workoutResponse.json()
 
-      // TODO: Send notifications to clients
-      // TODO: Create workout logs for tracking
+      // Create workout logs for each selected client
+      for (const clientId of selectedClients) {
+        const workoutLogData = {
+          clientId: parseInt(clientId),
+          workoutId: savedWorkout.id,
+          date: scheduledDate ? scheduledDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          status: 'planned',
+          notes: assignmentNotes
+        }
+
+        await fetch('/api/workout-logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(workoutLogData)
+        })
+      }
 
       onSuccess()
     } catch (error) {

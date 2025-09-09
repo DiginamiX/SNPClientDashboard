@@ -1395,8 +1395,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const workoutLogs = await storage.getWorkoutLogsByClientId(clientId);
-      res.json(workoutLogs);
+      
+      // Enhance workout logs with full workout details
+      const enhancedLogs = await Promise.all(workoutLogs.map(async (log) => {
+        const workout = await storage.getWorkout(log.workoutId);
+        const workoutExercises = await storage.getWorkoutExercisesByWorkoutId(log.workoutId);
+        
+        // Get exercise details for each workout exercise
+        const enhancedExercises = await Promise.all(workoutExercises.map(async (we) => {
+          const exercise = await storage.getExercise(we.exerciseId);
+          return {
+            ...we,
+            exercise
+          };
+        }));
+
+        return {
+          ...log,
+          workout: {
+            ...workout,
+            workout_exercises: enhancedExercises
+          }
+        };
+      }));
+
+      res.json(enhancedLogs);
     } catch (error) {
+      console.error('Error fetching workout logs:', error);
       res.status(500).json({ message: 'Server error fetching workout logs' });
     }
   });
