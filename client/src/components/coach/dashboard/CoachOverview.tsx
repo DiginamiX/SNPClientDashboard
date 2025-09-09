@@ -261,7 +261,12 @@ export default function CoachOverview() {
             <Button 
               variant="ghost" 
               className="w-full mt-4"
-              onClick={() => setLocation('/coach/activity')}
+              onClick={() => {
+                toast({
+                  title: "Feature Coming Soon",
+                  description: "Activity history page is under development and will be available soon.",
+                });
+              }}
             >
               View All Activity
             </Button>
