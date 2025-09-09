@@ -83,25 +83,12 @@ export default function Checkins() {
         notes: values.notes || null,
       });
       
-      const response = await fetch('/api/checkins/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-          notes: values.notes || null,
-        }),
-        credentials: 'include',
+      const response = await apiRequest('POST', '/api/checkins/request', {
+        date,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        notes: values.notes || null,
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Check-in request failed:', errorText);
-        throw new Error(`Failed to schedule check-in: ${errorText}`);
-      }
       
       return response.json();
     },
