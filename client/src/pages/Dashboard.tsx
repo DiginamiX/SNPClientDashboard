@@ -132,7 +132,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-                Welcome back, {user?.first_name || user?.firstName || "User"}! 👋
+                Welcome back, {user?.firstName || user?.first_name || "User"}! 👋
               </h1>
               <p className="text-white/80 text-lg">
                 Your next check-in is scheduled for{" "}
