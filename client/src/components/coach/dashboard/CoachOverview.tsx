@@ -4,6 +4,8 @@ import { MetricCard } from "@/components/ui/metric-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useQuery } from "@tanstack/react-query"
+import { useLocation } from "wouter"
+import { useToast } from "@/hooks/use-toast"
 
 interface CoachStats {
   totalClients: number
@@ -25,6 +27,8 @@ interface RecentActivity {
 
 export default function CoachOverview() {
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('month')
+  const [_, setLocation] = useLocation()
+  const { toast } = useToast()
 
   // Mock data - replace with actual API calls
   const stats: CoachStats = {
@@ -114,7 +118,7 @@ export default function CoachOverview() {
             ))}
           </div>
           
-          <Button variant="default" size="lg">
+          <Button variant="default" size="lg" onClick={() => setLocation('/coach/clients')}>
             <i className="ri-add-line mr-2" />
             Add Client
           </Button>
@@ -254,7 +258,11 @@ export default function CoachOverview() {
               ))}
             </div>
             
-            <Button variant="ghost" className="w-full mt-4">
+            <Button 
+              variant="ghost" 
+              className="w-full mt-4"
+              onClick={() => setLocation('/coach/activity')}
+            >
               View All Activity
             </Button>
           </CardContent>
@@ -268,22 +276,43 @@ export default function CoachOverview() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setLocation('/coach/workouts')}
+            >
               <i className="ri-add-circle-line text-xl" />
               <span className="text-sm">New Workout</span>
             </Button>
             
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => {
+                toast({
+                  title: "Feature Coming Soon",
+                  description: "Meal plan creation is under development and will be available soon.",
+                });
+              }}
+            >
               <i className="ri-restaurant-line text-xl" />
               <span className="text-sm">Create Meal Plan</span>
             </Button>
             
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setLocation('/messages')}
+            >
               <i className="ri-message-2-line text-xl" />
               <span className="text-sm">Send Message</span>
             </Button>
             
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setLocation('/checkins')}
+            >
               <i className="ri-calendar-event-line text-xl" />
               <span className="text-sm">Schedule Check-in</span>
             </Button>

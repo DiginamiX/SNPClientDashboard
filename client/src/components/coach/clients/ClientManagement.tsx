@@ -10,6 +10,37 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { apiRequest } from "@/lib/queryClient"
+import { useToast } from "@/hooks/use-toast"
 
 interface Client {
   id: number
@@ -36,11 +67,74 @@ interface Client {
   }
 }
 
+const addClientSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  packageType: z.string().min(1, "Package type is required"),
+  goals: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type AddClientFormValues = z.infer<typeof addClientSchema>;
+
 export default function ClientManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedClients, setSelectedClients] = useState<number[]>([])
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'paused'>('all')
+  const [addClientOpen, setAddClientOpen] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+
+  const addClientForm = useForm<AddClientFormValues>({
+    resolver: zodResolver(addClientSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      packageType: "",
+      goals: "",
+      notes: "",
+    },
+  })
+
+  const addClientMutation = useMutation({
+    mutationFn: async (data: AddClientFormValues) => {
+      const response = await apiRequest("POST", "/api/clients", {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        packageType: data.packageType,
+        goals: data.goals,
+        notes: data.notes,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Client Added",
+        description: "New client has been successfully added to your roster.",
+      });
+      setAddClientOpen(false);
+      addClientForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add client. Please try again.",
+        variant: "destructive",
+      });
+    },
+  })
+
+  const onAddClientSubmit = (values: AddClientFormValues) => {
+    addClientMutation.mutate(values);
+  }
 
   // Mock data - replace with actual API call
   const clients: Client[] = [
@@ -146,10 +240,169 @@ export default function ClientManagement() {
             <i className="ri-download-line mr-2" />
             Export
           </Button>
-          <Button variant="default">
-            <i className="ri-add-line mr-2" />
-            Add Client
-          </Button>
+          <Dialog open={addClientOpen} onOpenChange={setAddClientOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default">
+                <i className="ri-add-line mr-2" />
+                Add Client
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add New Client</DialogTitle>
+                <DialogDescription>
+                  Create a new client profile and assign them to your coaching program.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...addClientForm}>
+                <form onSubmit={addClientForm.handleSubmit(onAddClientSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={addClientForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter first name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={addClientForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter last name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={addClientForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="client@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={addClientForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={addClientForm.control}
+                    name="packageType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Package Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a package" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="basic">Basic - $99/month</SelectItem>
+                            <SelectItem value="standard">Standard - $199/month</SelectItem>
+                            <SelectItem value="premium">Premium - $299/month</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={addClientForm.control}
+                    name="goals"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Goals (optional)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="What are the client's fitness goals?"
+                            rows={2}
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={addClientForm.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes (optional)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Any additional notes about the client..."
+                            rows={2}
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setAddClientOpen(false)}
+                      disabled={addClientMutation.isPending}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={addClientMutation.isPending}
+                    >
+                      {addClientMutation.isPending ? (
+                        <>
+                          <i className="ri-loader-4-line animate-spin mr-2"></i>
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <i className="ri-add-line mr-2"></i>
+                          Add Client
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

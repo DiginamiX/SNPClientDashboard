@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { apiRequest } from '@/lib/queryClient';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { ProgressPhoto } from '@/types';
 import { formatDate } from '@/lib/dateUtils';
@@ -73,10 +74,18 @@ export default function ProgressPhotos() {
 
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
+      // Get auth headers but modify for FormData
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
       const response = await fetch('/api/progress-photos', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
+        headers,
       });
       
       if (!response.ok) {
