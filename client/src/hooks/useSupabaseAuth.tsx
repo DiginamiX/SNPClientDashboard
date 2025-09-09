@@ -96,17 +96,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'client' | 'admin', additionalData?: any) => {
     try {
-      const { data, error } = await auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            role,
-            first_name: additionalData?.firstName || '',
-            last_name: additionalData?.lastName || '',
-            username: email.split('@')[0]
-          }
-        }
+      const { data, error } = await auth.signUp(email, password, {
+        role,
+        first_name: additionalData?.firstName || '',
+        last_name: additionalData?.lastName || '',
+        username: email.split('@')[0]
       })
       
       if (error) throw error
@@ -128,10 +122,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await auth.signInWithPassword({
-        email,
-        password
-      })
+      const { data, error } = await auth.signIn(email, password)
       
       if (error) throw error
       
@@ -205,7 +196,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       if (!authState.user) throw new Error('No user logged in')
       
-      const { error } = await auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         data: {
           ...authState.user.user_metadata,
           ...updates
