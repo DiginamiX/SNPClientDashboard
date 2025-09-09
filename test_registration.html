@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #f97316; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #ea580c; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .success { background: #d1fae5; border: 1px solid #10b981; color: #065f46; }
+        .error { background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; }
+        .info { background: #dbeafe; border: 1px solid #3b82f6; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <h1>Test Registration & Database Integration</h1>
+    
+    <div class="form-group">
+        <button onclick="testDatabaseConnection()">Test Database Connection</button>
+    </div>
+    
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" value="testuser456" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="testuser456@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" value="Test" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" value="User" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role">
+                <option value="client">Client</option>
+                <option value="admin">Coach/Admin</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" value="password123" required>
+        </div>
+        
+        <button type="submit">Register User</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testDatabaseConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Testing database connection...</div>';
+            
+            try {
+                const response = await fetch('/api/test/db');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Database Connection Successful</h3>
+                            <p><strong>User Count:</strong> ${data.userCount}</p>
+                            <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Database Connection Failed</h3>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Connection Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Registering user...</div>';
+            
+            const formData = new FormData(e.target);
+            const userData = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                role: formData.get('role'),
+                password: formData.get('password')
+            };
+            
+            try {
+                console.log('🔍 Attempting registration:', userData);
+                
+                const response = await fetch('/api/auth/register-simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                console.log('📝 Registration response:', data);
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Registration Successful!</h3>
+                            <p><strong>User ID:</strong> ${data.user.id}</p>
+                            <p><strong>Username:</strong> ${data.user.username}</p>
+                            <p><strong>Email:</strong> ${data.user.email}</p>
+                            <p><strong>Name:</strong> ${data.user.first_name} ${data.user.last_name}</p>
+                            <p><strong>Role:</strong> ${data.user.role}</p>
+                            <p><strong>Created:</strong> ${data.user.created_at}</p>
+                        </div>
+                    `;
+                    
+                    // Test session persistence
+                    setTimeout(async () => {
+                        try {
+                            const sessionResponse = await fetch('/api/auth/me', {
+                                credentials: 'include'
+                            });
+                            const sessionData = await sessionResponse.json();
+                            
+                            if (sessionResponse.ok) {
+                                resultDiv.innerHTML += `
+                                    <div class="success" style="margin-top: 10px;">
+                                        <h3>✅ Session Persistence Working!</h3>
+                                        <p>User session retrieved successfully</p>
+                                    </div>
+                                `;
+                            } else {
+                                resultDiv.innerHTML += `
+                                    <div class="error" style="margin-top: 10px;">
+                                        <h3>⚠️ Session Issue</h3>
+                                        <p>${sessionData.message}</p>
+                                    </div>
+                                `;
+                            }
+                        } catch (error) {
+                            console.error('Session test failed:', error);
+                        }
+                    }, 1000);
+                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Registration Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Message:</strong> ${data.message}</p>
+                            <p><strong>Error:</strong> ${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+        
+        // Auto-test database connection on page load
+        window.addEventListener('load', testDatabaseConnection);
+    </script>
+</body>
+</html>

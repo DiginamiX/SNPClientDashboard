@@ -2,35 +2,36 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
+// import { Toaster } from "@/components/ui/toaster";
+// import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "./pages/not-found";
 
 // Client pages
-import Dashboard from "@/pages/Dashboard";
-import WeightTracking from "@/pages/WeightTracking";
-import ProgressPhotos from "@/pages/ProgressPhotos";
-import Checkins from "@/pages/Checkins";
-import Messages from "@/pages/Messages";
-import MealPlans from "@/pages/MealPlans";
-import Settings from "@/pages/Settings";
+import Dashboard from "./pages/Dashboard";
+import WeightTracking from "./pages/WeightTracking";
+import ProgressPhotos from "./pages/ProgressPhotos";
+import Checkins from "./pages/Checkins";
+import Messages from "./pages/Messages";
+import MealPlans from "./pages/MealPlans";
+import Settings from "./pages/Settings";
 
 // Coach pages
-import CoachDashboard from "@/pages/coach/Dashboard";
-import CoachClients from "@/pages/coach/Clients";
-import CoachWorkouts from "@/pages/coach/Workouts";
+import CoachDashboard from "./pages/coach/Dashboard";
+import CoachClients from "./pages/coach/Clients";
+import CoachWorkouts from "./pages/coach/Workouts";
 
 // Client pages
-import WorkoutExecution from "@/pages/client/WorkoutExecution";
-import MyWorkouts from "@/pages/client/MyWorkouts";
+import WorkoutExecution from "./pages/client/WorkoutExecution";
+import MyWorkouts from "./pages/client/MyWorkouts";
 
 // Auth pages
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import ForgotPassword from "@/pages/ForgotPassword";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 
-import Layout from "@/components/layout/Layout";
-import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
+import Layout from "./components/layout/Layout";
+import { SupabaseAuthProvider } from "./hooks/useSupabaseAuth";
+import { AuthProvider } from "./hooks/useAuth";
 import { ThemeProvider } from "next-themes";
 
 function Router() {
@@ -77,10 +78,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light">
         <SupabaseAuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <AuthProvider>
+            <div>
+              {/* <Toaster /> */}
+              <Router />
+            </div>
+          </AuthProvider>
         </SupabaseAuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

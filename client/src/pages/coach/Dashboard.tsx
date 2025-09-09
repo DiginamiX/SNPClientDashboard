@@ -1,5 +1,5 @@
 import CoachOverview from "@/components/coach/dashboard/CoachOverview"
-import { useAuth } from "@/hooks/useSupabaseAuth"
+import { useAuth } from "@/hooks/useAuth"
 import { useEffect } from "react"
 import { useLocation } from "wouter"
 

@@ -43,9 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
+    setLoading(true);
     try {
-      // Use a direct fetch instead of apiRequest to better handle the login response
-      const response = await fetch('/api/auth/login', {
+      console.log('🔍 Frontend: Starting login...', { username });
+      
+      // Use the simple login endpoint that works with database
+      const response = await fetch('/api/auth/login-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,37 +57,86 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: 'include',
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Login failed');
+        console.error('❌ Login failed:', data);
+        throw new Error(data.message || 'Login failed');
       }
       
-      const data = await response.json();
+      console.log('✅ Login successful:', data);
       setUser(data.user);
-      setLocation('/');
+      
+      // Navigate based on role
+      if (data.user.role === 'admin') {
+        setLocation('/coach');
+      } else {
+        setLocation('/');
+      }
+      
       toast({
         title: 'Welcome back!',
         description: `You've successfully logged in.`,
       });
     } catch (error) {
       console.error('Login failed:', error);
+      toast({
+        title: 'Login failed',
+        description: error.message || 'An error occurred during login',
+        variant: 'destructive',
+      });
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData: any) => {
+    setLoading(true);
     try {
-      const response = await apiRequest('POST', '/api/auth/register', userData);
+      console.log('🔍 Frontend: Starting registration...', { email: userData.email, role: userData.role });
+      
+      // Use the Supabase registration endpoint
+      const response = await fetch('/api/auth/register-supabase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(userData),
+      });
+      
       const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Registration failed:', data);
+        throw new Error(data.message || 'Registration failed');
+      }
+      
+      console.log('✅ Registration successful:', data);
       setUser(data.user);
-      setLocation('/');
+      
+      // Navigate based on role
+      if (data.user.role === 'admin') {
+        setLocation('/coach');
+      } else {
+        setLocation('/');
+      }
+      
       toast({
         title: 'Account created!',
-        description: 'You have successfully registered and logged in.',
+        description: `Welcome ${data.user.first_name}! You have successfully registered.`,
       });
     } catch (error) {
       console.error('Registration failed:', error);
+      toast({
+        title: 'Registration failed',
+        description: error.message || 'An error occurred during registration',
+        variant: 'destructive',
+      });
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

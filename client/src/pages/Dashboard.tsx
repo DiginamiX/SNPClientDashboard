@@ -11,12 +11,31 @@ import ProgressPhotos from "@/components/dashboard/ProgressPhotos";
 import UpcomingCheckins from "@/components/dashboard/UpcomingCheckins";
 import NutritionPlan from "@/components/dashboard/NutritionPlan";
 import AssignedWorkouts from "@/components/client/dashboard/AssignedWorkouts";
-import { useAuth } from "@/hooks/useSupabaseAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [_, setLocation] = useLocation();
+
+  // Redirect admin users to coach dashboard
+  useEffect(() => {
+    if (!loading && user && user.role === 'admin') {
+      setLocation('/coach');
+    }
+  }, [user, loading, setLocation]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (user && user.role === 'admin') {
+    return null; // Will redirect in useEffect
+  }
 
   // Fetch data with loading states
   const { data: weightLogs, isLoading: isLoadingWeightLogs } = useQuery({
@@ -113,7 +132,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-                Welcome back, {user?.firstName || "John"}! 👋
+                Welcome back, {user?.first_name || user?.firstName || "User"}! 👋
               </h1>
               <p className="text-white/80 text-lg">
                 Your next check-in is scheduled for{" "}

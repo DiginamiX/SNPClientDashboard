@@ -14,15 +14,19 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be less than 20 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Password must be at least 6 characters')
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['client', 'admin'], { required_error: 'Please select a role' })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword']
@@ -32,7 +36,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
-  const { signUp } = useSupabaseAuth();
+  const [isCoach, setIsCoach] = useState(false);
+  const { register } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -40,28 +45,44 @@ export default function Register() {
     defaultValues: {
       firstName: '',
       lastName: '',
+      username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      role: 'client'
     }
   });
+
+  // Update role when coach toggle changes
+  const handleCoachToggle = (checked: boolean) => {
+    setIsCoach(checked);
+    form.setValue('role', checked ? 'admin' : 'client');
+  };
 
   const onSubmit = async (values: FormValues) => {
     setIsRegistering(true);
     try {
+      console.log('🔍 Registration form submission:', { 
+        email: values.email, 
+        username: values.username, 
+        role: values.role 
+      });
+      
       const { confirmPassword, ...userData } = values;
-      await signUp(
-        userData.email,
-        userData.password,
-        'client', // Default role for new registrations
-        {
-          firstName: userData.firstName,
-          lastName: userData.lastName
-        }
-      );
+      await register(userData);
+      
+      toast({
+        title: 'Success!',
+        description: `Welcome ${userData.firstName}! Your ${userData.role === 'admin' ? 'coach' : 'client'} account has been created.`,
+      });
+      
     } catch (error: any) {
       console.error('Registration error:', error);
-      // Error toast is handled by the Supabase auth hook
+      toast({
+        title: 'Registration Failed',
+        description: error.message || 'An error occurred during registration. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsRegistering(false);
     }
@@ -88,8 +109,27 @@ export default function Register() {
           </div>
           <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
           <CardDescription className="text-center">
-            Enter your information to register
+            Join as a {isCoach ? 'Coach' : 'Client'} and start your fitness journey
           </CardDescription>
+          
+          {/* Role Toggle */}
+          <div className="flex items-center justify-center space-x-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <Badge variant={!isCoach ? "default" : "secondary"} className="px-3 py-1">
+                <i className="ri-user-line mr-1"></i>
+                Client
+              </Badge>
+              <Switch
+                checked={isCoach}
+                onCheckedChange={handleCoachToggle}
+                className="mx-2"
+              />
+              <Badge variant={isCoach ? "default" : "secondary"} className="px-3 py-1">
+                <i className="ri-team-line mr-1"></i>
+                Coach
+              </Badge>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -130,6 +170,25 @@ export default function Register() {
                   )}
                 />
               </div>
+              
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Choose a unique username"
+                        {...field}
+                        disabled={isRegistering}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -186,16 +245,20 @@ export default function Register() {
               />
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-blue-600"
+                className="w-full"
                 disabled={isRegistering}
+                variant={isCoach ? "premium" : "default"}
               >
                 {isRegistering ? (
                   <>
                     <i className="ri-loader-4-line animate-spin mr-2"></i>
-                    Creating Account...
+                    Creating {isCoach ? 'Coach' : 'Client'} Account...
                   </>
                 ) : (
-                  'Create Account'
+                  <>
+                    <i className={`${isCoach ? 'ri-team-line' : 'ri-user-line'} mr-2`}></i>
+                    Create {isCoach ? 'Coach' : 'Client'} Account
+                  </>
                 )}
               </Button>
             </form>
@@ -204,8 +267,8 @@ export default function Register() {
         <CardFooter>
           <div className="text-sm text-center w-full text-slate-500 dark:text-slate-400">
             Already have an account?{' '}
-            <Link href="/login">
-              <a className="text-primary hover:underline">Sign in</a>
+            <Link href="/login" className="text-primary hover:underline">
+              Sign in
             </Link>
           </div>
         </CardFooter>

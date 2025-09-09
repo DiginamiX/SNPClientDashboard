@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNP Client Portal - Authentication Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #f97316;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f97316;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: #6b7280;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #f97316;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #fecaca;
+        }
+        
+        .dashboard {
+            display: none;
+            text-align: center;
+        }
+        
+        .dashboard.active {
+            display: block;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .welcome h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .user-info {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .user-info h3 {
+            color: #374151;
+            margin-bottom: 12px;
+        }
+        
+        .user-info p {
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Forms -->
+        <div id="auth-section">
+            <div class="logo">
+                <h1>SNP Portal</h1>
+                <p>Your Fitness Journey Starts Here</p>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('login')">Login</div>
+                <div class="tab" onclick="switchTab('register')">Register</div>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-section" class="form-section active">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">Username or Email</label>
+                        <input type="text" id="login-username" name="username" value="client@test.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" value="password123" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="login-btn">
+                        <span class="btn-text">Sign In</span>
+                        <div class="loading hidden"></div>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register-section" class="form-section">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-firstname">First Name</label>
+                        <input type="text" id="register-firstname" name="firstName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-lastname">Last Name</label>
+                        <input type="text" id="register-lastname" name="lastName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-role">Account Type</label>
+                        <select id="register-role" name="role" required>
+                            <option value="client">Client</option>
+                            <option value="admin">Coach/Trainer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="register-btn">
+                        <span class="btn-text">Create Account</span>
+                        <div class="loading hidden"></div>
+                    </button>
+                </form>
+            </div>
+            
+            <div id="message"></div>
+        </div>
+        
+        <!-- Dashboard -->
+        <div id="dashboard-section" class="dashboard">
+            <div class="welcome">
+                <h2 id="welcome-message">Welcome!</h2>
+                <p>You're successfully logged in</p>
+            </div>
+            
+            <div class="user-info">
+                <h3>Account Information</h3>
+                <p><strong>Name:</strong> <span id="user-name">-</span></p>
+                <p><strong>Email:</strong> <span id="user-email">-</span></p>
+                <p><strong>Username:</strong> <span id="user-username">-</span></p>
+                <p><strong>Role:</strong> <span id="user-role">-</span></p>
+                <p><strong>Account Created:</strong> <span id="user-created">-</span></p>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        
+        function switchTab(tab) {
+            // Update tab appearance
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${tab === 'login' ? '1' : '2'})`).classList.add('active');
+            
+            // Update form sections
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${tab}-section`).classList.add('active');
+            
+            // Clear messages
+            clearMessage();
+        }
+        
+        function showMessage(message, type = 'error') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        function clearMessage() {
+            document.getElementById('message').innerHTML = '';
+        }
+        
+        function setLoading(formId, loading) {
+            const btn = document.getElementById(`${formId}-btn`);
+            const text = btn.querySelector('.btn-text');
+            const loader = btn.querySelector('.loading');
+            
+            if (loading) {
+                text.classList.add('hidden');
+                loader.classList.remove('hidden');
+                btn.disabled = true;
+            } else {
+                text.classList.remove('hidden');
+                loader.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+        
+        function showDashboard(user) {
+            currentUser = user;
+            
+            // Update welcome message
+            document.getElementById('welcome-message').textContent = 
+                `Welcome back, ${user.first_name || user.firstName || 'User'}!`;
+            
+            // Update user info
+            document.getElementById('user-name').textContent = 
+                `${user.first_name || user.firstName || ''} ${user.last_name || user.lastName || ''}`.trim() || 'Not provided';
+            document.getElementById('user-email').textContent = user.email || 'Not provided';
+            document.getElementById('user-username').textContent = user.username || 'Not provided';
+            document.getElementById('user-role').textContent = 
+                user.role === 'admin' ? 'Coach/Trainer' : 'Client';
+            document.getElementById('user-created').textContent = 
+                user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown';
+            
+            // Switch to dashboard
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('dashboard-section').classList.add('active');
+        }
+        
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(() => {
+                currentUser = null;
+                document.getElementById('auth-section').style.display = 'block';
+                document.getElementById('dashboard-section').classList.remove('active');
+                clearMessage();
+                
+                // Reset forms
+                document.getElementById('login-form').reset();
+                document.getElementById('register-form').reset();
+                document.getElementById('login-username').value = 'client@test.com';
+                document.getElementById('login-password').value = 'password123';
+            });
+        }
+        
+        // Check if user is already logged in
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.user) {
+                        showDashboard(data.user);
+                    }
+                }
+            } catch (error) {
+                console.log('No existing session');
+            }
+        }
+        
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessage();
+            setLoading('login', true);
+            
+            const formData = new FormData(e.target);
+            const loginData = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch('/api/auth/login-simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => showDashboard(data.user), 1000);
+                } else {
+                    showMessage(data.message || 'Login failed');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.');
+                console.error('Login error:', error);
+            } finally {
+                setLoading('login', false);
+            }
+        });
+        
+        // Register form handler
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessage();
+            setLoading('register', true);
+            
+            const formData = new FormData(e.target);
+            const registerData = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                role: formData.get('role'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch('/api/auth/register-supabase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(registerData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage('Account created successfully! You are now logged in.', 'success');
+                    setTimeout(() => showDashboard(data.user), 1000);
+                } else {
+                    showMessage(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.');
+                console.error('Registration error:', error);
+            } finally {
+                setLoading('register', false);
+            }
+        });
+        
+        // Check session on page load
+        checkSession();
+    </script>
+</body>
+</html>
