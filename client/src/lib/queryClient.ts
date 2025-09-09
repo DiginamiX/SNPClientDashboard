@@ -17,6 +17,9 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   
   if (session?.access_token) {
     headers['Authorization'] = `Bearer ${session.access_token}`;
+    console.log('✅ JWT token found for API request');
+  } else {
+    console.log('❌ No JWT token found for API request');
   }
   
   return headers;
@@ -31,7 +34,7 @@ export async function apiRequest(
   
   const res = await fetch(url, {
     method,
-    headers: data ? headers : { Authorization: headers.Authorization },
+    headers,
     body: data ? JSON.stringify(data) : undefined,
   });
 
@@ -48,7 +51,7 @@ export const getQueryFn: <T>(options: {
     const headers = await getAuthHeaders();
     
     const res = await fetch(queryKey[0] as string, {
-      headers: { Authorization: headers.Authorization },
+      headers,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
