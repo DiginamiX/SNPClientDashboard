@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
 
@@ -136,8 +136,35 @@ export default function ClientManagement() {
     addClientMutation.mutate(values);
   }
 
-  // Mock data - replace with actual API call
-  const clients: Client[] = [
+  // Fetch real clients data
+  const { data: apiClients = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ['/api/clients'],
+    queryFn: async () => {
+      const response = await fetch('/api/clients', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch clients');
+      return response.json();
+    }
+  });
+
+  // Transform API data to match component interface
+  const clients: Client[] = apiClients.map((client: any) => ({
+    id: client.id,
+    name: `${client.firstName || ''} ${client.lastName || ''}`.trim(),
+    email: client.email,
+    avatar: client.avatar,
+    status: 'active' as const,
+    joinDate: client.createdAt?.split('T')[0] || '2024-01-01',
+    lastActivity: '1 day ago',
+    currentProgram: 'Custom Program',
+    compliance: { workout: 85, nutrition: 78, overall: 82 },
+    progress: { weightChange: 0, workoutsCompleted: 0, daysActive: 30 },
+    package: { name: client.packageType || 'Standard', price: 199 }
+  }));
+
+  // Mock additional clients for demo - remove this section when real data is sufficient
+  const mockClients: Client[] = clients.length === 0 ? [
     {
       id: 1,
       name: "Sarah Johnson",
@@ -177,9 +204,11 @@ export default function ClientManagement() {
       progress: { weightChange: -1.2, workoutsCompleted: 8, daysActive: 15 },
       package: { name: "Basic", price: 99 }
     }
-  ]
+  ] : [];
 
-  const filteredClients = clients.filter(client => {
+  const allClients = [...clients, ...mockClients];
+
+  const filteredClients = allClients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || client.status === statusFilter

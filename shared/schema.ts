@@ -37,6 +37,12 @@ export const clients = pgTable("clients", {
   startingWeight: decimal("starting_weight"), // in kg/lbs
   goalWeight: decimal("goal_weight"), // in kg/lbs
   dateOfBirth: date("date_of_birth"),
+  phone: text("phone"),
+  packageType: text("package_type"),
+  goals: text("goals"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Weight logs table

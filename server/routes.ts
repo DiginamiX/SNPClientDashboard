@@ -29,6 +29,8 @@ import path from "path";
 import fs from "fs";
 import rateLimit from "express-rate-limit";
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
+import passport from 'passport';
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -1423,6 +1425,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching workout logs:', error);
       res.status(500).json({ message: 'Server error fetching workout logs' });
+    }
+  });
+
+  // Client management endpoints
+  apiRouter.post('/clients', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Only coaches/admins can add clients
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can add clients' });
+      }
+
+      const { firstName, lastName, email, phone, packageType, goals, notes } = req.body;
+
+      if (!firstName || !lastName || !email || !packageType) {
+        return res.status(400).json({ message: 'First name, last name, email, and package type are required' });
+      }
+
+      // Check if user with this email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+
+      // Create user account for the client
+      const hashedPassword = await bcrypt.hash('defaultpassword123', 10); // Temporary password
+      const userData = {
+        username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'client' as const
+      };
+
+      const newUser = await storage.createUser(userData);
+
+      // Create client profile
+      const clientData = {
+        userId: parseInt(newUser.id),
+        phone: phone || null,
+        packageType,
+        goals: goals || null,
+        notes: notes || null
+      };
+
+      const client = await storage.createClient(clientData);
+
+      res.status(201).json({
+        success: true,
+        client: {
+          id: client.id,
+          user: { ...newUser, password: undefined },
+          ...clientData
+        }
+      });
+    } catch (error) {
+      console.error('Error creating client:', error);
+      res.status(500).json({ message: 'Server error creating client' });
+    }
+  });
+
+  apiRouter.get('/clients', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Only coaches/admins can view all clients
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can view all clients' });
+      }
+
+      const clients = await storage.getAllClients();
+      res.json(clients);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      res.status(500).json({ message: 'Server error fetching clients' });
     }
   });
 
