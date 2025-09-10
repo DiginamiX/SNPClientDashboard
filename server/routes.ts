@@ -117,40 +117,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create API router
   const apiRouter = Router();
 
-  // Supabase JWT Authentication middleware
+  // Flexible Authentication middleware (supports both JWT and session)
   const isAuthenticated = async (req: Request, res: Response, next: any) => {
     try {
+      // First try JWT authentication
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized - No token provided' });
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+        
+        // Verify the JWT token with Supabase
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        
+        if (!error && user) {
+          // Attach user info to request
+          (req as any).user = {
+            id: user.id,
+            email: user.email,
+            role: user.user_metadata?.role || 'client',
+            firstName: user.user_metadata?.first_name,
+            lastName: user.user_metadata?.last_name
+          };
+
+          console.log('✅ User authenticated via JWT:', { 
+            id: user.id, 
+            email: user.email, 
+            role: user.user_metadata?.role 
+          });
+
+          return next();
+        }
       }
 
-      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-      
-      // Verify the JWT token with Supabase
-      const { data: { user }, error } = await supabase.auth.getUser(token);
-      
-      if (error || !user) {
-        console.log('❌ Auth verification failed:', error?.message);
-        return res.status(401).json({ message: 'Unauthorized - Invalid token' });
+      // Fallback to session authentication
+      if ((req as any).session?.user) {
+        (req as any).user = (req as any).session.user;
+        console.log('✅ User authenticated via session:', { 
+          id: (req as any).session.user.id, 
+          email: (req as any).session.user.email,
+          role: (req as any).session.user.role
+        });
+        return next();
       }
 
-      // Attach user info to request
-      (req as any).user = {
-        id: user.id,
-        email: user.email,
-        role: user.user_metadata?.role || 'client',
-        firstName: user.user_metadata?.first_name,
-        lastName: user.user_metadata?.last_name
-      };
-
-      console.log('✅ User authenticated:', { 
-        id: user.id, 
-        email: user.email, 
-        role: user.user_metadata?.role 
-      });
-
-      next();
+      console.log('❌ No valid authentication found');
+      return res.status(401).json({ message: 'Unauthorized - No valid authentication' });
     } catch (error) {
       console.log('❌ Auth middleware error:', error);
       res.status(401).json({ message: 'Unauthorized - Auth error' });

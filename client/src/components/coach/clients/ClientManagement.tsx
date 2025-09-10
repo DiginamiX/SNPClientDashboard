@@ -103,16 +103,23 @@ export default function ClientManagement() {
 
   const addClientMutation = useMutation({
     mutationFn: async (data: AddClientFormValues) => {
-      const response = await apiRequest("POST", "/api/clients", {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        packageType: data.packageType,
-        goals: data.goals,
-        notes: data.notes,
-      });
-      return response.json();
+      console.log('🔍 Starting add client mutation with data:', data);
+      try {
+        const response = await apiRequest("POST", "/api/clients", {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone,
+          packageType: data.packageType,
+          goals: data.goals,
+          notes: data.notes,
+        });
+        console.log('✅ Add client API response received');
+        return response.json();
+      } catch (error) {
+        console.error('❌ Add client mutation failed:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
@@ -137,19 +144,18 @@ export default function ClientManagement() {
   }
 
   // Fetch real clients data
-  const { data: apiClients = [], isLoading: clientsLoading } = useQuery({
-    queryKey: ['/api/clients'],
-    queryFn: async () => {
-      const response = await fetch('/api/clients', {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch clients');
-      return response.json();
-    }
+  const { data: apiClients = [], isLoading: clientsLoading, error: clientsError } = useQuery({
+    queryKey: ['/api/clients']
+  });
+
+  console.log('🔍 Clients query state:', { 
+    apiClients, 
+    isLoading: clientsLoading, 
+    error: clientsError 
   });
 
   // Transform API data to match component interface
-  const clients: Client[] = apiClients.map((client: any) => ({
+  const clients: Client[] = (apiClients as any[]).map((client: any) => ({
     id: client.id,
     name: `${client.firstName || ''} ${client.lastName || ''}`.trim(),
     email: client.email,

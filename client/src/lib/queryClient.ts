@@ -9,6 +9,7 @@ async function throwIfResNotOk(res: Response) {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
+  console.log('🔍 Getting auth headers...');
   const { data: { session } } = await supabase.auth.getSession();
   
   const headers: Record<string, string> = {
@@ -22,6 +23,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     console.log('❌ No JWT token found for API request. Session:', session);
   }
   
+  console.log('🔍 Final headers:', headers);
   return headers;
 }
 
@@ -62,13 +64,17 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    console.log('🔍 Making authenticated query to:', queryKey[0]);
     const headers = await getAuthHeaders();
     
     const res = await fetch(queryKey[0] as string, {
       headers,
     });
 
+    console.log('🔍 Query response status:', res.status);
+
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      console.log('❌ 401 unauthorized, returning null');
       return null;
     }
 
