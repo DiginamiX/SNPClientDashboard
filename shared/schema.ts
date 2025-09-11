@@ -23,7 +23,7 @@ export const users = pgTable("users", {
 // Coaches table
 export const coaches = pgTable("coaches", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: uuid("user_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   specialization: text("specialization"),
   bio: text("bio"),
 });
@@ -31,7 +31,7 @@ export const coaches = pgTable("coaches", {
 // Clients table
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: uuid("user_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   coachId: integer("coach_id").references(() => coaches.id),
   height: decimal("height"), // in cm
   startingWeight: decimal("starting_weight"), // in kg/lbs
@@ -85,8 +85,8 @@ export const checkins = pgTable("checkins", {
 // Messages table
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  senderId: integer("sender_id").notNull().references(() => users.id),
-  receiverId: integer("receiver_id").notNull().references(() => users.id),
+  senderId: uuid("sender_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  receiverId: uuid("receiver_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   content: text("content").notNull(),
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -95,8 +95,8 @@ export const messages = pgTable("messages", {
 // Nutrition plans table
 export const nutritionPlans = pgTable("nutrition_plans", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull().references(() => clients.id),
-  coachId: integer("coach_id").notNull().references(() => coaches.id),
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   title: text("title").notNull(),
   description: text("description"),
   proteinTarget: integer("protein_target").notNull(), // in grams
@@ -114,7 +114,7 @@ export const nutritionPlans = pgTable("nutrition_plans", {
 // Device integrations table (for Feelfit and other services)
 export const deviceIntegrations = pgTable("device_integrations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }), // Fix: Change from integer to uuid
   provider: text("provider").notNull(), // e.g., "feelfit", "fitbit", etc.
   externalId: text("external_id"), // User ID in the external system
   accessToken: text("access_token"), // OAuth token or API key
@@ -139,7 +139,7 @@ export const exercises = pgTable("exercises", {
   difficultyLevel: difficultyLevelEnum("difficulty_level"),
   videoUrl: text("video_url"),
   thumbnailUrl: text("thumbnail_url"),
-  createdBy: integer("created_by").references(() => users.id),
+  createdBy: uuid("created_by").references(() => users.id), // Fix: Change from integer to uuid
   isPublic: boolean("is_public").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -150,7 +150,7 @@ export const programTypeEnum = pgEnum('program_type', ['strength', 'cardio', 'hy
 
 export const programs = pgTable("programs", {
   id: serial("id").primaryKey(),
-  coachId: integer("coach_id").notNull().references(() => users.id),
+  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   name: text("name").notNull(),
   description: text("description"),
   durationWeeks: integer("duration_weeks"),
@@ -195,9 +195,9 @@ export const programStatusEnum = pgEnum('program_status', ['active', 'completed'
 
 export const clientPrograms = pgTable("client_programs", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull().references(() => users.id),
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   programId: integer("program_id").notNull().references(() => programs.id),
-  assignedBy: integer("assigned_by").notNull().references(() => users.id), // Coach
+  assignedBy: uuid("assigned_by").notNull().references(() => users.id), // Fix: Change from integer to uuid
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   status: programStatusEnum("status").default('active'),
@@ -212,7 +212,7 @@ export const workoutStatusEnum = pgEnum('workout_status', ['planned', 'in_progre
 
 export const workoutLogs = pgTable("workout_logs", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull().references(() => users.id),
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   workoutId: integer("workout_id").notNull().references(() => workouts.id),
   programId: integer("program_id").references(() => programs.id),
   date: date("date").notNull(),
@@ -243,7 +243,7 @@ export const exerciseLogs = pgTable("exercise_logs", {
 // Enhanced meal planning
 export const mealPlans = pgTable("meal_plans", {
   id: serial("id").primaryKey(),
-  coachId: integer("coach_id").notNull().references(() => users.id),
+  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   name: text("name").notNull(),
   description: text("description"),
   totalCalories: integer("total_calories"),
@@ -278,9 +278,9 @@ export const mealPlanStatusEnum = pgEnum('meal_plan_status', ['active', 'complet
 
 export const clientMealPlans = pgTable("client_meal_plans", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull().references(() => users.id),
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   mealPlanId: integer("meal_plan_id").notNull().references(() => mealPlans.id),
-  assignedBy: integer("assigned_by").notNull().references(() => users.id),
+  assignedBy: uuid("assigned_by").notNull().references(() => users.id), // Fix: Change from integer to uuid
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   status: mealPlanStatusEnum("status").default('active'),
@@ -291,7 +291,7 @@ export const clientMealPlans = pgTable("client_meal_plans", {
 // Enhanced body measurements
 export const bodyMeasurements = pgTable("body_measurements", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull().references(() => users.id),
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   date: date("date").notNull(),
   weight: decimal("weight"),
   bodyFatPercentage: decimal("body_fat_percentage"),
@@ -313,8 +313,8 @@ export const relationshipStatusEnum = pgEnum('relationship_status', ['active', '
 
 export const coachClients = pgTable("coach_clients", {
   id: serial("id").primaryKey(),
-  coachId: integer("coach_id").notNull().references(() => users.id),
-  clientId: integer("client_id").notNull().references(() => users.id),
+  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
   startDate: date("start_date").notNull().default(sql`CURRENT_DATE`),
   endDate: date("end_date"),
   status: relationshipStatusEnum("status").default('active'),

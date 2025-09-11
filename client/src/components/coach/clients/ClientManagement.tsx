@@ -115,7 +115,11 @@ export default function ClientManagement() {
           notes: data.notes,
         });
         console.log('✅ Add client API response received');
-        return response.json();
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       } catch (error) {
         console.error('❌ Add client mutation failed:', error);
         throw error;
@@ -145,7 +149,20 @@ export default function ClientManagement() {
 
   // Fetch real clients data
   const { data: apiClients = [], isLoading: clientsLoading, error: clientsError } = useQuery({
-    queryKey: ['/api/clients']
+    queryKey: ['/api/clients'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("GET", "/api/clients");
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+        throw error;
+      }
+    }
   });
 
   console.log('🔍 Clients query state:', { 

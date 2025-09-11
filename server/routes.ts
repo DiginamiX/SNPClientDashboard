@@ -187,6 +187,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Simple database test without using our schema
       const postgres = (await import('postgres')).default;
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'DATABASE_URL environment variable not set' 
+        });
+      }
       const client = postgres(process.env.DATABASE_URL, { prepare: false });
       const result = await client`SELECT COUNT(*) as count FROM users`;
       await client.end();
@@ -197,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userCount: result[0].count,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: 'Database connection failed',
@@ -206,7 +212,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Simple registration endpoint that bypasses Drizzle ORM issues
   // Demo registration endpoint that bypasses database issues
   apiRouter.post('/auth/register-demo', async (req, res) => {
     const startTime = Date.now();
@@ -237,9 +242,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('✅ Demo user created:', { id: mockUser.id, email: mockUser.email, role: mockUser.role });
       
-      // Create session manually
-      req.session.userId = mockUser.id;
-      req.session.user = mockUser;
+      // Create session manually (if session middleware is available)
+      if ((req as any).session) {
+        (req as any).session.userId = mockUser.id;
+        (req as any).session.user = mockUser;
+      }
       
       const duration = Date.now() - startTime;
       console.log(`✅ Demo registration completed in ${duration}ms`);
@@ -250,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Registration successful (demo mode - user created in session only)'
       });
       
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       console.log(`❌ Demo registration failed after ${duration}ms:`, error.message);
       res.status(500).json({ message: 'Registration failed', error: error.message });
@@ -294,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('✅ User created with Supabase Auth:', { id: data.user?.id, email: data.user?.email });
       
-      // Create session manually for immediate login
+      // Create session manually for immediate login (if session middleware is available)
       const user = {
         id: data.user?.id,
         username,
@@ -305,8 +312,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         created_at: data.user?.created_at
       };
       
-      req.session.userId = user.id;
-      req.session.user = user;
+      if ((req as any).session) {
+        (req as any).session.userId = user.id;
+        (req as any).session.user = user;
+      }
       
       const duration = Date.now() - startTime;
       console.log(`✅ Supabase registration completed in ${duration}ms`);
@@ -316,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: user
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.log('❌ Registration error:', error.message);
       res.status(500).json({ message: 'Registration failed', error: error.message });
     }
@@ -345,6 +354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create user directly with postgres
       const postgres = (await import('postgres')).default;
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'DATABASE_URL environment variable not set' 
+        });
+      }
       const client = postgres(process.env.DATABASE_URL, { prepare: false });
       
       // Check if user exists
@@ -366,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           VALUES (${username}, ${email}, ${firstName}, ${lastName}, ${role || 'client'})
           RETURNING id, username, email, first_name, last_name, role, created_at
         `;
-      } catch (error) {
+      } catch (error: any) {
         if (error.message.includes('null value in column "id"')) {
           // If database doesn't auto-generate, create UUID manually
           const userId = crypto.randomUUID();
@@ -385,9 +400,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = result[0];
       console.log('✅ User created:', { id: user.id, email: user.email });
       
-      // Create a session manually
-      req.session.userId = user.id;
-      req.session.user = user;
+      // Create a session manually (if session middleware is available)
+      if ((req as any).session) {
+        (req as any).session.userId = user.id;
+        (req as any).session.user = user;
+      }
       
       const duration = Date.now() - startTime;
       console.log(`✅ Simple registration completed in ${duration}ms`);
@@ -397,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: user
       });
       
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       console.log(`❌ Simple registration failed after ${duration}ms:`, error.message);
       res.status(500).json({ message: 'Registration failed', error: error.message });
@@ -421,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const registrationPromise = (async () => {
-      const userData = insertUserSchema.parse(req.body);
+      const userData: any = insertUserSchema.parse(req.body);
         
         console.log('✅ Schema validation passed');
       
@@ -477,23 +494,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('🔄 Logging in user...');
       
-      // Log in the user after registration
-      req.login(user, (err) => {
-        if (err) {
-            console.log('❌ Login after registration failed:', err.message);
-          return res.status(500).json({ message: 'Error during login after registration' });
-        }
-          
-          const duration = Date.now() - startTime;
-          console.log(`✅ Registration completed in ${duration}ms`);
+      // Log in the user after registration (if using session-based auth)
+      if ((req as any).login) {
+        (req as any).login(user, (err: any) => {
+          if (err) {
+              console.log('❌ Login after registration failed:', err.message);
+            return res.status(500).json({ message: 'Error during login after registration' });
+          }
+            
+            const duration = Date.now() - startTime;
+            console.log(`✅ Registration completed in ${duration}ms`);
+          return res.status(201).json({ user: { ...user, password: undefined } });
+        });
+      } else {
+        // If not using session-based auth, just return the user
+        const duration = Date.now() - startTime;
+        console.log(`✅ Registration completed in ${duration}ms`);
         return res.status(201).json({ user: { ...user, password: undefined } });
-      });
+      }
       })();
       
       // Race between registration and timeout
       await Promise.race([registrationPromise, timeoutPromise]);
       
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       console.log(`❌ Registration failed after ${duration}ms:`, error.message);
       
@@ -556,9 +580,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('✅ Demo user logged in:', { id: mockUser.id, email: mockUser.email, role: mockUser.role });
       
-      // Create session manually
-      req.session.userId = mockUser.id;
-      req.session.user = mockUser;
+      // Create session manually (if session middleware is available)
+      if ((req as any).session) {
+        (req as any).session.userId = mockUser.id;
+        (req as any).session.user = mockUser;
+      }
       
       const duration = Date.now() - startTime;
       console.log(`✅ Demo login completed in ${duration}ms`);
@@ -568,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: mockUser
       });
       
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       console.log(`❌ Demo login failed after ${duration}ms:`, error.message);
       res.status(500).json({ message: 'Login failed', error: error.message });
@@ -590,6 +616,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Query user directly with postgres
       const postgres = (await import('postgres')).default;
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ 
+          success: false, 
+          message: 'DATABASE_URL environment variable not set' 
+        });
+      }
       const client = postgres(process.env.DATABASE_URL, { prepare: false });
       
       const users = await client`
@@ -612,9 +644,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await client.end();
       
-      // Create session manually
-      req.session.userId = user.id;
-      req.session.user = user;
+      // Create session manually (if session middleware is available)
+      if ((req as any).session) {
+        (req as any).session.userId = user.id;
+        (req as any).session.user = user;
+      }
       
       const duration = Date.now() - startTime;
       console.log(`✅ Simple login completed in ${duration}ms`);
@@ -624,7 +658,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: user
       });
       
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       console.log(`❌ Simple login failed after ${duration}ms:`, error.message);
       res.status(500).json({ message: 'Login failed', error: error.message });
@@ -1475,7 +1509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create client profile
       const clientData = {
-        userId: parseInt(newUser.id),
+        userId: newUser.id, // This is now a UUID string
         phone: phone || null,
         packageType,
         goals: goals || null,
@@ -1492,9 +1526,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...clientData
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating client:', error);
-      res.status(500).json({ message: 'Server error creating client' });
+      res.status(500).json({ message: 'Server error creating client', error: error.message });
     }
   });
 

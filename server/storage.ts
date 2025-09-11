@@ -55,8 +55,8 @@ export interface IStorage {
   
   // Message operations
   createMessage(message: InsertMessage): Promise<Message>;
-  getMessagesByUserId(userId: number): Promise<Message[]>;
-  getConversation(user1Id: number, user2Id: number): Promise<Message[]>;
+  getMessagesByUserId(userId: string): Promise<Message[]>;
+  getConversation(user1Id: string, user2Id: string): Promise<Message[]>;
   markMessageAsRead(id: number): Promise<Message>;
   
   // Nutrition plan operations
@@ -66,8 +66,8 @@ export interface IStorage {
 
   // Device integration operations
   createDeviceIntegration(integration: InsertDeviceIntegration): Promise<DeviceIntegration>;
-  getDeviceIntegrationByUserId(userId: number, provider: string): Promise<DeviceIntegration | undefined>;
-  getDeviceIntegrationsByUserId(userId: number): Promise<DeviceIntegration[]>;
+  getDeviceIntegrationByUserId(userId: string, provider: string): Promise<DeviceIntegration | undefined>;
+  getDeviceIntegrationsByUserId(userId: string): Promise<DeviceIntegration[]>;
   updateDeviceIntegration(id: number, data: Partial<InsertDeviceIntegration>): Promise<DeviceIntegration>;
   deleteDeviceIntegration(id: number): Promise<void>;
   
@@ -152,7 +152,7 @@ export class DatabaseStorage implements IStorage {
     return client;
   }
 
-  async getClientByUserId(userId: number): Promise<Client | undefined> {
+  async getClientByUserId(userId: string): Promise<Client | undefined> {
     const [client] = await db.select().from(clients).where(eq(clients.userId, userId));
     return client;
   }
@@ -196,7 +196,7 @@ export class DatabaseStorage implements IStorage {
     return coach;
   }
 
-  async getCoachByUserId(userId: number): Promise<Coach | undefined> {
+  async getCoachByUserId(userId: string): Promise<Coach | undefined> {
     const [coach] = await db.select().from(coaches).where(eq(coaches.userId, userId));
     return coach;
   }
@@ -306,7 +306,7 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
-  async getMessagesByUserId(userId: number): Promise<Message[]> {
+  async getMessagesByUserId(userId: string): Promise<Message[]> {
     return db
       .select()
       .from(messages)
@@ -316,7 +316,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(messages.createdAt));
   }
 
-  async getConversation(user1Id: number, user2Id: number): Promise<Message[]> {
+  async getConversation(user1Id: string, user2Id: string): Promise<Message[]> {
     return db
       .select()
       .from(messages)
@@ -377,7 +377,7 @@ export class DatabaseStorage implements IStorage {
     return createdIntegration;
   }
 
-  async getDeviceIntegrationByUserId(userId: number, provider: string): Promise<DeviceIntegration | undefined> {
+  async getDeviceIntegrationByUserId(userId: string, provider: string): Promise<DeviceIntegration | undefined> {
     const [integration] = await db
       .select()
       .from(deviceIntegrations)
@@ -391,7 +391,7 @@ export class DatabaseStorage implements IStorage {
     return integration;
   }
 
-  async getDeviceIntegrationsByUserId(userId: number): Promise<DeviceIntegration[]> {
+  async getDeviceIntegrationsByUserId(userId: string): Promise<DeviceIntegration[]> {
     return db
       .select()
       .from(deviceIntegrations)
