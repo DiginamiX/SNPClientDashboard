@@ -18,12 +18,12 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   
   if (session?.access_token) {
     headers['Authorization'] = `Bearer ${session.access_token}`;
-    console.log('✅ JWT token found for API request:', session.access_token.substring(0, 20) + '...');
+    console.log('✅ JWT token found for API request. Token length:', session.access_token.length);
   } else {
-    console.log('❌ No JWT token found for API request. Session:', session);
+    console.log('❌ No JWT token found for API request. Session exists:', !!session);
   }
   
-  console.log('🔍 Final headers:', headers);
+  console.log('🔍 Final headers include Authorization:', !!headers['Authorization']);
   return headers;
 }
 
