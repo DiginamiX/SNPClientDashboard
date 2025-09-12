@@ -93,7 +93,7 @@ const authRateLimit = rateLimit({
 
 const generalRateLimit = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per windowMs for general endpoints
+  max: 500, // Increase limit to prevent blocking normal usage
   message: { message: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -180,8 +180,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(403).json({ message: 'Forbidden - Admin access required' });
   };
 
-  // Apply rate limiting to auth routes
-  apiRouter.use('/auth', authRateLimit);
+  // Apply rate limiting to specific auth routes only (not /auth/me)
+  apiRouter.use('/auth/register', authRateLimit);
+  apiRouter.use('/auth/login', authRateLimit);
+  apiRouter.use('/auth/register-demo', authRateLimit);
+  apiRouter.use('/auth/login-demo', authRateLimit);
+  apiRouter.use('/auth/register-supabase', authRateLimit);
+  apiRouter.use('/auth/login-simple', authRateLimit);
+  apiRouter.use('/auth/register-simple', authRateLimit);
   
   // Apply general rate limiting to all other API routes
   apiRouter.use(generalRateLimit);
@@ -280,7 +286,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use Supabase Auth to create the user
       const { createClient } = await import('@supabase/supabase-js');
       const supabaseUrl = process.env.SUPABASE_URL || 'https://vdykrlyybwwbcqqcgjbp.supabase.co';
-      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkeWtybHl5Ynd3YmNxcWNnamJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMzY2NzAsImV4cCI6MjA3MTcxMjY3MH0.McnQU03YULVB_dcwIa4QNmXml5YmTpOefa1ySkvBVEA';
+      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+      
+      if (!supabaseAnonKey) {
+        return res.status(500).json({ message: 'SUPABASE_ANON_KEY environment variable must be set' });
+      }
       
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
       
@@ -477,12 +487,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create client profile if role is client
       if (user.role === 'client') {
           console.log('🔄 Creating client profile...');
-        const clientData = insertClientSchema.parse({
-          userId: user.id,
-          ...req.body.clientData
-        });
-        await storage.createClient(clientData);
+        try {
+          const clientData = insertClientSchema.parse({
+            userId: user.id,
+            // Provide defaults if clientData is missing
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email,
+            ...req.body.clientData
+          });
+          await storage.createClient(clientData);
           console.log('✅ Client profile created');
+        } catch (clientError) {
+          console.log('⚠️ Client profile creation failed, creating minimal profile:', (clientError as any).message);
+          // Create minimal client profile with required fields only
+          const minimalClientData = {
+            userId: user.id,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email
+          };
+          await storage.createClient(minimalClientData);
+          console.log('✅ Minimal client profile created');
+        }
       }
       
       // Create coach profile if role is admin
@@ -532,28 +559,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Demo endpoint to get current user from session
-  apiRouter.get('/auth/me', async (req, res) => {
+  // Protected endpoint to get current user (JWT-based)
+  apiRouter.get('/auth/me', isAuthenticated, async (req, res) => {
     try {
-      console.log('🔍 Checking current user session:', { 
-        userId: req.session?.userId, 
-        hasUser: !!req.session?.user 
+      const user = (req as any).user;
+      console.log('✅ Current authenticated user:', { 
+        id: user.id, 
+        email: user.email,
+        role: user.role 
       });
-      
-      if (req.session?.user) {
-        console.log('✅ User found in session:', { 
-          id: req.session.user.id, 
-          username: req.session.user.username,
-          role: req.session.user.role 
-        });
-        res.json({ user: req.session.user });
-      } else {
-        console.log('❌ No user in session');
-        res.status(401).json({ message: 'Not authenticated' });
-      }
+      res.json({ user });
     } catch (error) {
-      console.log('❌ Session check failed:', error.message);
-      res.status(500).json({ message: 'Session check failed', error: error.message });
+      console.log('❌ Auth check failed:', (error as any).message);
+      res.status(500).json({ message: 'Auth check failed', error: (error as any).message });
     }
   });
 
