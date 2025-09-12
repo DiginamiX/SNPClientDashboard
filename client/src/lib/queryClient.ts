@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { supabase } from './supabase';
+import type { Session } from '@supabase/supabase-js';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -8,44 +9,35 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  console.log('🔍 Getting auth headers...');
+function getAuthHeaders(session: Session | null): Record<string, string> {
+  console.log('🔍 Getting auth headers from session...');
   
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    console.log('🔍 Session response:', { hasSession: !!session, error: error?.message });
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`;
-      console.log('✅ JWT token found for API request. Token length:', session.access_token.length);
-    } else {
-      console.log('❌ No JWT token found. Session details:', {
-        hasSession: !!session,
-        hasAccessToken: !!session?.access_token,
-        sessionUser: session?.user?.email || 'no user'
-      });
-    }
-    
-    console.log('🔍 Final headers include Authorization:', !!headers['Authorization']);
-    return headers;
-  } catch (error) {
-    console.error('❌ Error getting auth headers:', error);
-    return {
-      'Content-Type': 'application/json'
-    };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+    console.log('✅ JWT token found for API request. Token length:', session.access_token.length);
+  } else {
+    console.log('❌ No JWT token found. Session details:', {
+      hasSession: !!session,
+      hasAccessToken: !!session?.access_token,
+      sessionUser: session?.user?.email || 'no user'
+    });
   }
+  
+  console.log('🔍 Final headers include Authorization:', !!headers['Authorization']);
+  return headers;
 }
 
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  session?: Session | null,
 ): Promise<Response> {
-  const headers = await getAuthHeaders();
+  const headers = getAuthHeaders(session || null);
   
   // Create an AbortController for timeout
   const controller = new AbortController();
@@ -74,11 +66,12 @@ export async function apiRequest(
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
+  session?: Session | null;
 }) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
+  ({ on401: unauthorizedBehavior, session }) =>
   async ({ queryKey }) => {
     console.log('🔍 Making authenticated query to:', queryKey[0]);
-    const headers = await getAuthHeaders();
+    const headers = getAuthHeaders(session || null);
     
     const res = await fetch(queryKey[0] as string, {
       headers,
@@ -98,7 +91,7 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "throw" }), // Sessions will be passed from components
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

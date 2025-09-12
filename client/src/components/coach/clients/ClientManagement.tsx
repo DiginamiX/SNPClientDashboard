@@ -41,6 +41,7 @@ import { z } from "zod"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth"
 
 interface Client {
   id: number
@@ -87,6 +88,7 @@ export default function ClientManagement() {
   const [addClientOpen, setAddClientOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { session } = useSupabaseAuth()
 
   const addClientForm = useForm<AddClientFormValues>({
     resolver: zodResolver(addClientSchema),
@@ -113,7 +115,7 @@ export default function ClientManagement() {
           packageType: data.packageType,
           goals: data.goals,
           notes: data.notes,
-        });
+        }, session);
         console.log('✅ Add client API response received');
         if (response.ok) {
           return response.json();
@@ -152,7 +154,7 @@ export default function ClientManagement() {
     queryKey: ['/api/clients'],
     queryFn: async () => {
       try {
-        const response = await apiRequest("GET", "/api/clients");
+        const response = await apiRequest("GET", "/api/clients", undefined, session);
         if (response.ok) {
           return response.json();
         } else {
