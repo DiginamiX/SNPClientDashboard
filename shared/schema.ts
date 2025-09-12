@@ -12,10 +12,13 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   username: text("username"),
   email: text("email").notNull().unique(),
+  password: text("password"), // Added missing password field
   firstName: text("first_name"),
   lastName: text("last_name"), 
   role: text("role").notNull().default('client'), // Changed from enum to text to match Supabase
   avatar: text("avatar"),
+  resetToken: text("reset_token"), // Added missing reset token field
+  resetTokenExpiry: timestamp("reset_token_expiry"), // Added missing reset token expiry field
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

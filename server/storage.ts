@@ -22,20 +22,21 @@ import { alias } from "drizzle-orm/pg-core";
 
 // Modify the interface with all the required CRUD methods
 export interface IStorage {
-  // User operations
-  getUser(id: number): Promise<User | undefined>;
+  // User operations  
+  getUser(id: string): Promise<User | undefined>; // Fixed: Changed from number to string for UUID
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
   // Client operations
-  getClient(id: number): Promise<Client | undefined>;
-  getClientByUserId(userId: number): Promise<Client | undefined>;
+  getClient(id: number): Promise<Client | undefined>; // Keep number for client.id (serial)
+  getClientByUserId(userId: string): Promise<Client | undefined>; // Fixed: Changed to string for user UUID
+  getAllClients(): Promise<any[]>; // Added missing method
   createClient(client: InsertClient): Promise<Client>;
   
   // Coach operations
-  getCoach(id: number): Promise<Coach | undefined>;
-  getCoachByUserId(userId: number): Promise<Coach | undefined>;
+  getCoach(id: number): Promise<Coach | undefined>; // Keep number for coach.id (serial)
+  getCoachByUserId(userId: string): Promise<Coach | undefined>; // Fixed: Changed to string for user UUID
   createCoach(coach: InsertCoach): Promise<Coach>;
   
   // Weight log operations
@@ -123,7 +124,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> { // Fixed: Changed parameter type to string
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
