@@ -73,8 +73,12 @@ const upload = multer({
 });
 
 // Supabase client setup for JWT verification
-const supabaseUrl = process.env.SUPABASE_URL || 'https://vdykrlyybwwbcqqcgjbp.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkeWtybHl5Ynd3YmNxcWNnamJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEzNjY3MCwiZXhwIjoyMDcxNzEyNjcwfQ.fYLdoULJWBQyrmH4DFLnq8CtHhq5xE4VChNsJHKJz2k';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables must be set');
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
