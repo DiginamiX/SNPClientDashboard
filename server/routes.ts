@@ -124,31 +124,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Flexible Authentication middleware (supports both JWT and session)
   const isAuthenticated = async (req: Request, res: Response, next: any) => {
     try {
-      // First try JWT authentication
+      console.log('🔍 Auth middleware called for:', req.method, req.path);
+      
+      // First try JWT authentication - robust header parsing
       const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      console.log('🔍 Authorization header present:', !!authHeader);
+      
+      if (authHeader) {
+        const [scheme, ...rest] = authHeader.split(' ');
+        console.log('🔍 Auth scheme:', scheme);
         
-        // Verify the JWT token with Supabase
-        const { data: { user }, error } = await supabase.auth.getUser(token);
-        
-        if (!error && user) {
-          // Attach user info to request
-          (req as any).user = {
-            id: user.id,
-            email: user.email,
-            role: user.user_metadata?.role || 'client',
-            firstName: user.user_metadata?.first_name,
-            lastName: user.user_metadata?.last_name
-          };
+        if ((scheme || '').toLowerCase() === 'bearer') {
+          const rawToken = rest.join(' ').trim();
+          // Strip quotes and handle null/undefined
+          const token = rawToken.replace(/^"|"$/g, '');
+          
+          console.log('🔍 Token extracted:', !!token && token !== 'null' && token !== 'undefined');
+          
+          if (token && token !== 'null' && token !== 'undefined') {
+            console.log('🔍 Token length:', token.length);
+            
+            try {
+              // Verify the JWT token with Supabase
+              const { data: { user }, error } = await supabase.auth.getUser(token);
+              
+              if (error) {
+                console.log('❌ Supabase auth error:', error.message);
+              } else if (user) {
+                // Attach user info to request
+                (req as any).user = {
+                  id: user.id,
+                  email: user.email,
+                  role: user.user_metadata?.role || 'client',
+                  firstName: user.user_metadata?.first_name,
+                  lastName: user.user_metadata?.last_name
+                };
 
-          console.log('✅ User authenticated via JWT:', { 
-            id: user.id, 
-            email: user.email, 
-            role: user.user_metadata?.role 
-          });
+                console.log('✅ User authenticated via JWT:', { 
+                  id: user.id, 
+                  email: user.email, 
+                  role: user.user_metadata?.role 
+                });
 
-          return next();
+                return next();
+              }
+            } catch (supabaseError) {
+              console.log('❌ Supabase verification failed:', (supabaseError as any).message);
+            }
+          } else {
+            console.log('❌ Invalid token value:', rawToken);
+          }
+        } else {
+          console.log('❌ Invalid auth scheme:', scheme);
         }
       }
 
@@ -163,10 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      console.log('❌ No valid authentication found');
+      console.log('❌ No valid authentication found for:', req.method, req.path);
       return res.status(401).json({ message: 'Unauthorized - No valid authentication' });
     } catch (error) {
-      console.log('❌ Auth middleware error:', error);
+      console.log('❌ Auth middleware error for', req.method, req.path, ':', error);
       res.status(401).json({ message: 'Unauthorized - Auth error' });
     }
   };
