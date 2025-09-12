@@ -10,21 +10,34 @@ async function throwIfResNotOk(res: Response) {
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   console.log('🔍 Getting auth headers...');
-  const { data: { session } } = await supabase.auth.getSession();
   
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
-  
-  if (session?.access_token) {
-    headers['Authorization'] = `Bearer ${session.access_token}`;
-    console.log('✅ JWT token found for API request. Token length:', session.access_token.length);
-  } else {
-    console.log('❌ No JWT token found for API request. Session exists:', !!session);
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    console.log('🔍 Session response:', { hasSession: !!session, error: error?.message });
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+      console.log('✅ JWT token found for API request. Token length:', session.access_token.length);
+    } else {
+      console.log('❌ No JWT token found. Session details:', {
+        hasSession: !!session,
+        hasAccessToken: !!session?.access_token,
+        sessionUser: session?.user?.email || 'no user'
+      });
+    }
+    
+    console.log('🔍 Final headers include Authorization:', !!headers['Authorization']);
+    return headers;
+  } catch (error) {
+    console.error('❌ Error getting auth headers:', error);
+    return {
+      'Content-Type': 'application/json'
+    };
   }
-  
-  console.log('🔍 Final headers include Authorization:', !!headers['Authorization']);
-  return headers;
 }
 
 export async function apiRequest(
