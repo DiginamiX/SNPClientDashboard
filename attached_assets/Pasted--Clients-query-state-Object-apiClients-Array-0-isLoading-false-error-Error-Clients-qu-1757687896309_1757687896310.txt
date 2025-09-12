@@ -1,0 +1,37 @@
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🔍 Starting add client mutation with data: 
+Object {firstName: "Test", lastName: "Pita", email: "sdvd@msc.com", phone: "", packageType: "standard", …}
+🔍 Getting auth headers from session...
+✅ JWT token found for API request. Token length: 1011
+🔍 Final headers include Authorization: true
+❌ Add client mutation failed: 
+Error {}
+message: "500: {"message":"Server error creating client","error":"getaddrinfo ENOTFOUND db.vdykrlyybwwbcqqcgjbp.supabase.co"}"
+stack: "Error: 500: {"message":"Server error creating client","error":"getaddrinfo ENOTFOUND db.vdykrlyybwwbcqqcgjbp.supabase.co"}↵ at throwIfResNotOk (https://e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/src/lib/queryClient.ts:5:11)↵ at async apiRequest (https://e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/src/lib/queryClient.ts:38:5)↵ at async Object.mutationFn (https://e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/src/components/coach/clients/ClientManagement.tsx:97:26)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
+🏠 Layout role check: 
+Object {userRole: "admin", isCoach: true, location: "/coach/clients", user: {…}}
+🔍 Clients query state: 
+Object {apiClients: Array(0), isLoading: false, error: Error}
