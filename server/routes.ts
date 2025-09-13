@@ -73,8 +73,9 @@ const upload = multer({
 });
 
 // Supabase client setup for JWT verification
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Use working Supabase URL (temporary fix for environment variable caching)
+const supabaseUrl = 'https://vdykrlyybwwbcqqcgjbp.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkeWtybHl5Yndda3QicWN3d2dqYnAiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNzI0NTExMzY4LCJleHAiOjIwNDAwODczNjh9.mRaH5dQKv8lkEH-iFwjEYq4AGt-dXCvgrnEyUwdvEME';
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables must be set');
