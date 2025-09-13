@@ -1,0 +1,305 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+SNPClientDashboard:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+SNPClientDashboard:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+SNPClientDashboard:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-1ae87f7f7b922a17.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-1ae87f7f7b922a17.js:38 [LaunchDarkly] LaunchDarkly client initialized
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'battery'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-87e4a596bb9cb438.js:1
+SNPClientDashboard:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SNPClientDashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'battery'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'layout-animations'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'legacy-image-formats'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'navigation-override'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'oversized-images'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'publickey-credentials'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'speaker-selection'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'unoptimized-images'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Unrecognized feature: 'unsized-media'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar24l%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/weight-logs:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/nutrition-plans:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/checkins:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/progress-photos:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/messages:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 Auth state changed: SIGNED_IN roberto+coach2@diginamix.marketing
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ✅ JWT token found for API request. Token length: 1011
+Console.js:61 🔍 Final headers include Authorization: true
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Starting add client mutation with data: Object
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ✅ JWT token found for API request. Token length: 1011
+Console.js:61 🔍 Final headers include Authorization: true
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/clients:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Console.js:61 ❌ Add client mutation failed: Error: 500: {"message":"Server error creating client","error":"column \"reset_token\" does not exist"}
+    at throwIfResNotOk (queryClient.ts:8:11)
+    at async apiRequest (queryClient.ts:55:5)
+    at async Object.mutationFn (ClientManagement.tsx:110:26)
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🔍 Clients query state: Object
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
