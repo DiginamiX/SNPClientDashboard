@@ -404,12 +404,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('✅ Schema validation passed');
       
       // Check if username or email already exists
+      // NOTE: Registration endpoint must use direct storage since no JWT token is available
       const existingUser = await storage.getUserByUsername(userData.username);
       if (existingUser) {
           console.log('❌ Username already exists:', userData.username);
         return res.status(400).json({ message: 'Username already exists' });
       }
       
+      // NOTE: Registration endpoint must use direct storage since no JWT token is available
       const existingEmail = await storage.getUserByEmail(userData.email);
       if (existingEmail) {
           console.log('❌ Email already exists:', userData.email);
@@ -424,6 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create user with hashed password
         console.log('🔄 Creating user in database...');
+      // NOTE: Registration endpoint must use direct storage since no JWT token is available  
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword

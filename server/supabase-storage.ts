@@ -52,6 +52,74 @@ export class SupabaseStorage implements IStorage {
     return new SupabaseStorage(token);
   }
 
+  /**
+   * DEEP RECURSIVE FIELD MAPPING UTILITIES
+   * 
+   * Convert between camelCase (application) and snake_case (database)
+   * with complete recursive handling of nested objects, arrays, and edge cases
+   */
+  
+  // Convert camelCase to snake_case
+  private snakeKey(key: string): string {
+    return key.replace(/([A-Z])/g, "_$1").toLowerCase();
+  }
+
+  // Convert snake_case to camelCase
+  private camelKey(key: string): string {
+    return key.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  }
+
+  // Check if value is a plain object (not array, Date, etc)
+  private isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && 
+           typeof value === 'object' && 
+           !Array.isArray(value) && 
+           !(value instanceof Date);
+  }
+
+  // Recursively map keys in nested structures
+  private mapKeysDeep(input: unknown, keyTransformer: (key: string) => string): unknown {
+    if (input === null || input === undefined) {
+      return input;
+    }
+
+    if (Array.isArray(input)) {
+      return input.map(item => this.mapKeysDeep(item, keyTransformer));
+    }
+
+    if (this.isPlainObject(input)) {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(input)) {
+        const transformedKey = keyTransformer(key);
+        result[transformedKey] = this.mapKeysDeep(value, keyTransformer);
+      }
+      return result;
+    }
+
+    // Return primitives, dates, and other non-object types unchanged
+    return input;
+  }
+
+  // Convert application data to database format (camelCase → snake_case)
+  private toDb<T>(data: T): T {
+    return this.mapKeysDeep(data, this.snakeKey.bind(this)) as T;
+  }
+
+  // Convert database data to application format (snake_case → camelCase)
+  private fromDb<T>(data: unknown): T {
+    return this.mapKeysDeep(data, this.camelKey.bind(this)) as T;
+  }
+
+  // Convert array of database rows to application format
+  private fromDbArray<T>(rows: unknown[]): T[] {
+    return rows.map(row => this.fromDb<T>(row));
+  }
+
+  // Helper for converting field names in database queries
+  private k(field: string): string {
+    return this.snakeKey(field);
+  }
+
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const { data, error } = await this.supabase
@@ -64,7 +132,7 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<User>(data) : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -78,7 +146,7 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<User>(data) : undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -92,18 +160,18 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<User>(data) : undefined;
   }
 
   async createUser(user: InsertUser): Promise<User> {
     const { data, error } = await this.supabase
       .from('users')
-      .insert(user)
+      .insert(this.toDb(user))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<User>(data);
   }
 
   // Client operations
@@ -118,21 +186,21 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Client>(data) : undefined;
   }
 
   async getClientByUserId(userId: string): Promise<Client | undefined> {
     const { data, error } = await this.supabase
       .from('clients')
       .select('*')
-      .eq('userId', userId)
+      .eq(this.k('userId'), userId)
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Client>(data) : undefined;
   }
 
   async getAllClients(): Promise<any[]> {
@@ -144,26 +212,26 @@ export class SupabaseStorage implements IStorage {
         users (
           username,
           email,
-          firstName,
-          lastName,
+          first_name,
+          last_name,
           role,
           avatar
         )
       `);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<any>(data) : [];
   }
 
   async createClient(client: InsertClient): Promise<Client> {
     const { data, error } = await this.supabase
       .from('clients')
-      .insert(client)
+      .insert(this.toDb(client))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Client>(data);
   }
 
   // Coach operations
@@ -178,114 +246,114 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Coach>(data) : undefined;
   }
 
   async getCoachByUserId(userId: string): Promise<Coach | undefined> {
     const { data, error } = await this.supabase
       .from('coaches')
       .select('*')
-      .eq('userId', userId)
+      .eq(this.k('userId'), userId)
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Coach>(data) : undefined;
   }
 
   async createCoach(coach: InsertCoach): Promise<Coach> {
     const { data, error } = await this.supabase
       .from('coaches')
-      .insert(coach)
+      .insert(this.toDb(coach))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Coach>(data);
   }
 
   // Weight log operations with RLS enforcement
   async createWeightLog(weightLog: InsertWeightLog): Promise<WeightLog> {
     const { data, error } = await this.supabase
       .from('weight_logs')
-      .insert(weightLog)
+      .insert(this.toDb(weightLog))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<WeightLog>(data);
   }
 
   async getWeightLogsByClientId(clientId: number): Promise<WeightLog[]> {
     const { data, error } = await this.supabase
       .from('weight_logs')
       .select('*')
-      .eq('clientId', clientId)
+      .eq(this.k('clientId'), clientId)
       .order('date', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<WeightLog>(data) : [];
   }
 
   async getWeightLogsByClientIdAndDateRange(clientId: number, startDate: Date, endDate: Date): Promise<WeightLog[]> {
     const { data, error } = await this.supabase
       .from('weight_logs')
       .select('*')
-      .eq('clientId', clientId)
+      .eq(this.k('clientId'), clientId)
       .gte('date', startDate.toISOString().split('T')[0])
       .lte('date', endDate.toISOString().split('T')[0])
       .order('date', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<WeightLog>(data) : [];
   }
 
   // Progress photo operations
   async createProgressPhoto(progressPhoto: InsertProgressPhoto): Promise<ProgressPhoto> {
     const { data, error } = await this.supabase
       .from('progress_photos')
-      .insert(progressPhoto)
+      .insert(this.toDb(progressPhoto))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<ProgressPhoto>(data);
   }
 
   async getProgressPhotosByClientId(clientId: number): Promise<ProgressPhoto[]> {
     const { data, error } = await this.supabase
       .from('progress_photos')
       .select('*')
-      .eq('clientId', clientId)
+      .eq(this.k('clientId'), clientId)
       .order('date', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<ProgressPhoto>(data) : [];
   }
 
   // Check-in operations
   async createCheckin(checkin: InsertCheckin): Promise<Checkin> {
     const { data, error } = await this.supabase
       .from('checkins')
-      .insert(checkin)
+      .insert(this.toDb(checkin))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Checkin>(data);
   }
 
   async getCheckinsByClientId(clientId: number): Promise<Checkin[]> {
     const { data, error } = await this.supabase
       .from('checkins')
       .select('*')
-      .eq('clientId', clientId)
+      .eq(this.k('clientId'), clientId)
       .order('date', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Checkin>(data) : [];
   }
 
   async getUpcomingCheckinsByClientId(clientId: number): Promise<Checkin[]> {
@@ -294,126 +362,126 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await this.supabase
       .from('checkins')
       .select('*')
-      .eq('clientId', clientId)
+      .eq(this.k('clientId'), clientId)
       .gte('date', today)
       .order('date', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Checkin>(data) : [];
   }
 
   async updateCheckinStatus(id: number, status: string): Promise<Checkin> {
     const { data, error } = await this.supabase
       .from('checkins')
-      .update({ status })
+      .update(this.toDb({ status }))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Checkin>(data);
   }
 
   // Message operations
   async createMessage(message: InsertMessage): Promise<Message> {
     const { data, error } = await this.supabase
       .from('messages')
-      .insert(message)
+      .insert(this.toDb(message))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Message>(data);
   }
 
   async getMessagesByUserId(userId: string): Promise<Message[]> {
     const { data, error } = await this.supabase
       .from('messages')
       .select('*')
-      .or(`senderId.eq.${userId},receiverId.eq.${userId}`)
-      .order('createdAt', { ascending: false });
+      .or(`${this.k('senderId')}.eq.${userId},${this.k('receiverId')}.eq.${userId}`)
+      .order(this.k('createdAt'), { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Message>(data) : [];
   }
 
   async getConversation(user1Id: string, user2Id: string): Promise<Message[]> {
     const { data, error } = await this.supabase
       .from('messages')
       .select('*')
-      .or(`and(senderId.eq.${user1Id},receiverId.eq.${user2Id}),and(senderId.eq.${user2Id},receiverId.eq.${user1Id})`)
-      .order('createdAt', { ascending: true });
+      .or(`and(${this.k('senderId')}.eq.${user1Id},${this.k('receiverId')}.eq.${user2Id}),and(${this.k('senderId')}.eq.${user2Id},${this.k('receiverId')}.eq.${user1Id})`)
+      .order(this.k('createdAt'), { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Message>(data) : [];
   }
 
   async markMessageAsRead(id: number): Promise<Message> {
     const { data, error } = await this.supabase
       .from('messages')
-      .update({ isRead: true })
+      .update(this.toDb({ isRead: true }))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Message>(data);
   }
 
   // Nutrition plan operations 
   async createNutritionPlan(nutritionPlan: InsertNutritionPlan): Promise<NutritionPlan> {
     const { data, error } = await this.supabase
       .from('nutrition_plans')
-      .insert(nutritionPlan)
+      .insert(this.toDb(nutritionPlan))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<NutritionPlan>(data);
   }
 
   async getNutritionPlansByClientId(clientId: number): Promise<NutritionPlan[]> {
     const { data, error } = await this.supabase
       .from('nutrition_plans')
       .select('*')
-      .eq('clientId', clientId);
+      .eq(this.k('clientId'), clientId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<NutritionPlan>(data) : [];
   }
 
   async getCurrentNutritionPlan(clientId: number): Promise<NutritionPlan | undefined> {
     const { data, error } = await this.supabase
       .from('nutrition_plans')
       .select('*')
-      .eq('clientId', clientId)
-      .eq('isActive', true)
+      .eq(this.k('clientId'), clientId)
+      .eq(this.k('isActive'), true)
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<NutritionPlan>(data) : undefined;
   }
 
   // Device integration operations
   async createDeviceIntegration(integration: InsertDeviceIntegration): Promise<DeviceIntegration> {
     const { data, error } = await this.supabase
       .from('device_integrations')
-      .insert(integration)
+      .insert(this.toDb(integration))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<DeviceIntegration>(data);
   }
 
   async getDeviceIntegrationByUserId(userId: string, provider: string): Promise<DeviceIntegration | undefined> {
     const { data, error } = await this.supabase
       .from('device_integrations')
       .select('*')
-      .eq('userId', userId)
+      .eq(this.k('userId'), userId)
       .eq('provider', provider)
       .single();
 
@@ -421,29 +489,29 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<DeviceIntegration>(data) : undefined;
   }
 
   async getDeviceIntegrationsByUserId(userId: string): Promise<DeviceIntegration[]> {
     const { data, error } = await this.supabase
       .from('device_integrations')
       .select('*')
-      .eq('userId', userId);
+      .eq(this.k('userId'), userId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<DeviceIntegration>(data) : [];
   }
 
   async updateDeviceIntegration(id: number, data: Partial<InsertDeviceIntegration>): Promise<DeviceIntegration> {
     const { data: result, error } = await this.supabase
       .from('device_integrations')
-      .update(data)
+      .update(this.toDb(data))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return result;
+    return this.fromDb<DeviceIntegration>(result);
   }
 
   async deleteDeviceIntegration(id: number): Promise<void> {
@@ -458,10 +526,10 @@ export class SupabaseStorage implements IStorage {
   async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
     const { error } = await this.supabase
       .from('users')
-      .update({ 
+      .update(this.toDb({ 
         resetToken: token, 
         resetTokenExpiry: expiry.toISOString() 
-      })
+      }))
       .eq('id', userId);
 
     if (error) throw error;
@@ -471,21 +539,21 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await this.supabase
       .from('users')
       .select('*')
-      .eq('resetToken', token)
-      .gt('resetTokenExpiry', new Date().toISOString())
+      .eq(this.k('resetToken'), token)
+      .gt(this.k('resetTokenExpiry'), new Date().toISOString())
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<User>(data) : undefined;
   }
 
   async updatePassword(userId: string, hashedPassword: string): Promise<void> {
     const { error } = await this.supabase
       .from('users')
-      .update({ password: hashedPassword })
+      .update(this.toDb({ password: hashedPassword }))
       .eq('id', userId);
 
     if (error) throw error;
@@ -494,7 +562,7 @@ export class SupabaseStorage implements IStorage {
   async clearPasswordResetToken(userId: string): Promise<void> {
     const { error } = await this.supabase
       .from('users')
-      .update({ resetToken: null, resetTokenExpiry: null })
+      .update(this.toDb({ resetToken: null, resetTokenExpiry: null }))
       .eq('id', userId);
 
     if (error) throw error;
@@ -504,12 +572,12 @@ export class SupabaseStorage implements IStorage {
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
     const { data, error } = await this.supabase
       .from('exercises')
-      .insert(exercise)
+      .insert(this.toDb(exercise))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Exercise>(data);
   }
 
   async getExercises(): Promise<Exercise[]> {
@@ -518,7 +586,7 @@ export class SupabaseStorage implements IStorage {
       .select('*');
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Exercise>(data) : [];
   }
 
   async getExercise(id: number): Promise<Exercise | undefined> {
@@ -532,19 +600,19 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Exercise>(data) : undefined;
   }
 
   async updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise> {
     const { data, error } = await this.supabase
       .from('exercises')
-      .update(exercise)
+      .update(this.toDb(exercise))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Exercise>(data);
   }
 
   async deleteExercise(id: number): Promise<void> {
@@ -560,12 +628,12 @@ export class SupabaseStorage implements IStorage {
   async createProgram(program: InsertProgram): Promise<Program> {
     const { data, error } = await this.supabase
       .from('programs')
-      .insert(program)
+      .insert(this.toDb(program))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Program>(data);
   }
 
   async getPrograms(): Promise<Program[]> {
@@ -574,17 +642,17 @@ export class SupabaseStorage implements IStorage {
       .select('*');
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Program>(data) : [];
   }
 
   async getProgramsByCoachId(coachId: number): Promise<Program[]> {
     const { data, error } = await this.supabase
       .from('programs')
       .select('*')
-      .eq('coachId', coachId);
+      .eq(this.k('coachId'), coachId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Program>(data) : [];
   }
 
   async getProgram(id: number): Promise<Program | undefined> {
@@ -598,19 +666,19 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Program>(data) : undefined;
   }
 
   async updateProgram(id: number, program: Partial<InsertProgram>): Promise<Program> {
     const { data, error } = await this.supabase
       .from('programs')
-      .update(program)
+      .update(this.toDb(program))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Program>(data);
   }
 
   async deleteProgram(id: number): Promise<void> {
@@ -626,12 +694,12 @@ export class SupabaseStorage implements IStorage {
   async createWorkout(workout: InsertWorkout): Promise<Workout> {
     const { data, error } = await this.supabase
       .from('workouts')
-      .insert(workout)
+      .insert(this.toDb(workout))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Workout>(data);
   }
 
   async getWorkouts(): Promise<Workout[]> {
@@ -640,17 +708,17 @@ export class SupabaseStorage implements IStorage {
       .select('*');
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Workout>(data) : [];
   }
 
   async getWorkoutsByProgramId(programId: number): Promise<Workout[]> {
     const { data, error } = await this.supabase
       .from('workouts')
       .select('*')
-      .eq('programId', programId);
+      .eq(this.k('programId'), programId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<Workout>(data) : [];
   }
 
   async getWorkout(id: number): Promise<Workout | undefined> {
@@ -664,19 +732,19 @@ export class SupabaseStorage implements IStorage {
       if (error.code === 'PGRST116') return undefined; // Row not found
       throw error;
     }
-    return data;
+    return data ? this.fromDb<Workout>(data) : undefined;
   }
 
   async updateWorkout(id: number, workout: Partial<InsertWorkout>): Promise<Workout> {
     const { data, error } = await this.supabase
       .from('workouts')
-      .update(workout)
+      .update(this.toDb(workout))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<Workout>(data);
   }
 
   async deleteWorkout(id: number): Promise<void> {
@@ -692,29 +760,29 @@ export class SupabaseStorage implements IStorage {
   async createWorkoutExercise(workoutExercise: any): Promise<any> {
     const { data, error } = await this.supabase
       .from('workout_exercises')
-      .insert(workoutExercise)
+      .insert(this.toDb(workoutExercise))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<any>(data);
   }
 
   async getWorkoutExercisesByWorkoutId(workoutId: number): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('workout_exercises')
       .select('*')
-      .eq('workoutId', workoutId);
+      .eq(this.k('workoutId'), workoutId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<any>(data) : [];
   }
 
   async deleteWorkoutExercisesByWorkoutId(workoutId: number): Promise<void> {
     const { error } = await this.supabase
       .from('workout_exercises')
       .delete()
-      .eq('workoutId', workoutId);
+      .eq(this.k('workoutId'), workoutId);
 
     if (error) throw error;
   }
@@ -723,99 +791,99 @@ export class SupabaseStorage implements IStorage {
   async assignProgramToClient(clientProgram: InsertClientProgram): Promise<ClientProgram> {
     const { data, error } = await this.supabase
       .from('client_programs')
-      .insert(clientProgram)
+      .insert(this.toDb(clientProgram))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<ClientProgram>(data);
   }
 
   async getClientPrograms(clientId: number): Promise<ClientProgram[]> {
     const { data, error } = await this.supabase
       .from('client_programs')
       .select('*')
-      .eq('clientId', clientId);
+      .eq(this.k('clientId'), clientId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<ClientProgram>(data) : [];
   }
 
   async getClientProgramsByCoachId(coachId: string): Promise<ClientProgram[]> {
     const { data, error } = await this.supabase
       .from('client_programs')
       .select('*')
-      .eq('assignedBy', coachId);
+      .eq(this.k('assignedBy'), coachId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<ClientProgram>(data) : [];
   }
 
   async updateClientProgramStatus(id: number, status: string): Promise<ClientProgram> {
     const { data, error } = await this.supabase
       .from('client_programs')
-      .update({ status })
+      .update(this.toDb({ status }))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<ClientProgram>(data);
   }
 
   // Workout log operations
   async createWorkoutLog(workoutLog: InsertWorkoutLog): Promise<WorkoutLog> {
     const { data, error } = await this.supabase
       .from('workout_logs')
-      .insert(workoutLog)
+      .insert(this.toDb(workoutLog))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<WorkoutLog>(data);
   }
 
   async getWorkoutLogsByClientId(clientId: number): Promise<WorkoutLog[]> {
     const { data, error } = await this.supabase
       .from('workout_logs')
       .select('*')
-      .eq('clientId', clientId);
+      .eq(this.k('clientId'), clientId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<WorkoutLog>(data) : [];
   }
 
   async updateWorkoutLog(id: number, workoutLog: Partial<InsertWorkoutLog>): Promise<WorkoutLog> {
     const { data, error } = await this.supabase
       .from('workout_logs')
-      .update(workoutLog)
+      .update(this.toDb(workoutLog))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<WorkoutLog>(data);
   }
 
   // Exercise log operations
   async createExerciseLog(exerciseLog: InsertExerciseLog): Promise<ExerciseLog> {
     const { data, error } = await this.supabase
       .from('exercise_logs')
-      .insert(exerciseLog)
+      .insert(this.toDb(exerciseLog))
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return this.fromDb<ExerciseLog>(data);
   }
 
   async getExerciseLogsByWorkoutLogId(workoutLogId: number): Promise<ExerciseLog[]> {
     const { data, error } = await this.supabase
       .from('exercise_logs')
       .select('*')
-      .eq('workoutLogId', workoutLogId);
+      .eq(this.k('workoutLogId'), workoutLogId);
 
     if (error) throw error;
-    return data || [];
+    return data ? this.fromDbArray<ExerciseLog>(data) : [];
   }
 }
