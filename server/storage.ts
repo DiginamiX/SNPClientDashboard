@@ -73,10 +73,10 @@ export interface IStorage {
   deleteDeviceIntegration(id: number): Promise<void>;
   
   // Password reset operations
-  setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void>;
+  setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void>;
   getUserByResetToken(token: string): Promise<User | undefined>;
-  updatePassword(userId: number, hashedPassword: string): Promise<void>;
-  clearPasswordResetToken(userId: number): Promise<void>;
+  updatePassword(userId: string, hashedPassword: string): Promise<void>;
+  clearPasswordResetToken(userId: string): Promise<void>;
 
   // Exercise operations
   createExercise(exercise: InsertExercise): Promise<Exercise>;
@@ -109,7 +109,7 @@ export interface IStorage {
   // Client program operations
   assignProgramToClient(clientProgram: InsertClientProgram): Promise<ClientProgram>;
   getClientPrograms(clientId: number): Promise<ClientProgram[]>;
-  getClientProgramsByCoachId(coachId: number): Promise<ClientProgram[]>;
+  getClientProgramsByCoachId(coachId: string): Promise<ClientProgram[]>;
   updateClientProgramStatus(id: number, status: string): Promise<ClientProgram>;
 
   // Workout log operations
@@ -234,8 +234,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(weightLogs.clientId, clientId),
-          gte(weightLogs.date, startDate),
-          lte(weightLogs.date, endDate)
+          gte(weightLogs.date, startDate.toISOString().split('T')[0]),
+          lte(weightLogs.date, endDate.toISOString().split('T')[0])
         )
       )
       .orderBy(weightLogs.date);
@@ -276,7 +276,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUpcomingCheckinsByClientId(clientId: number): Promise<Checkin[]> {
-    const today = new Date();
+    const today = new Date().toISOString().split('T')[0];
     return db
       .select()
       .from(checkins)
@@ -416,7 +416,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Password reset operations
-  async setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void> {
+  async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
     await db
       .update(users)
       .set({ 
@@ -439,14 +439,14 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updatePassword(userId: number, hashedPassword: string): Promise<void> {
+  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
     await db
       .update(users)
       .set({ password: hashedPassword })
       .where(eq(users.id, userId));
   }
   
-  async clearPasswordResetToken(userId: number): Promise<void> {
+  async clearPasswordResetToken(userId: string): Promise<void> {
     await db
       .update(users)
       .set({ 
@@ -572,7 +572,7 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(clientPrograms).where(eq(clientPrograms.clientId, clientId)).orderBy(desc(clientPrograms.startDate));
   }
 
-  async getClientProgramsByCoachId(coachId: number): Promise<ClientProgram[]> {
+  async getClientProgramsByCoachId(coachId: string): Promise<ClientProgram[]> {
     return db.select().from(clientPrograms).where(eq(clientPrograms.assignedBy, coachId)).orderBy(desc(clientPrograms.startDate));
   }
 

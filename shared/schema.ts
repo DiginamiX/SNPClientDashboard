@@ -35,7 +35,8 @@ export const coaches = pgTable("coaches", {
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
-  coachId: integer("coach_id").references(() => coaches.id),
+  coachId: integer("coach_id").references(() => coaches.id), // Fixed: Integer to match coaches.id type
+  createdBy: uuid("created_by").references(() => users.id), // Track who created the client
   height: decimal("height"), // in cm
   startingWeight: decimal("starting_weight"), // in kg/lbs
   goalWeight: decimal("goal_weight"), // in kg/lbs
@@ -98,8 +99,8 @@ export const messages = pgTable("messages", {
 // Nutrition plans table
 export const nutritionPlans = pgTable("nutrition_plans", {
   id: serial("id").primaryKey(),
-  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
-  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  clientId: integer("client_id").notNull().references(() => clients.id), // Reference clients.id (serial)
+  coachId: integer("coach_id").notNull().references(() => coaches.id), // Reference coaches.id (serial)
   title: text("title").notNull(),
   description: text("description"),
   proteinTarget: integer("protein_target").notNull(), // in grams
@@ -142,7 +143,7 @@ export const exercises = pgTable("exercises", {
   difficultyLevel: difficultyLevelEnum("difficulty_level"),
   videoUrl: text("video_url"),
   thumbnailUrl: text("thumbnail_url"),
-  createdBy: uuid("created_by").references(() => users.id), // Fix: Change from integer to uuid
+  createdBy: uuid("created_by").references(() => users.id), // User UUID for created by
   isPublic: boolean("is_public").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -153,7 +154,7 @@ export const programTypeEnum = pgEnum('program_type', ['strength', 'cardio', 'hy
 
 export const programs = pgTable("programs", {
   id: serial("id").primaryKey(),
-  coachId: uuid("coach_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  coachId: integer("coach_id").notNull().references(() => coaches.id), // Reference coaches.id (serial)
   name: text("name").notNull(),
   description: text("description"),
   durationWeeks: integer("duration_weeks"),
@@ -198,7 +199,7 @@ export const programStatusEnum = pgEnum('program_status', ['active', 'completed'
 
 export const clientPrograms = pgTable("client_programs", {
   id: serial("id").primaryKey(),
-  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  clientId: integer("client_id").notNull().references(() => clients.id), // Reference clients.id (serial)
   programId: integer("program_id").notNull().references(() => programs.id),
   assignedBy: uuid("assigned_by").notNull().references(() => users.id), // Fix: Change from integer to uuid
   startDate: date("start_date").notNull(),
@@ -215,7 +216,7 @@ export const workoutStatusEnum = pgEnum('workout_status', ['planned', 'in_progre
 
 export const workoutLogs = pgTable("workout_logs", {
   id: serial("id").primaryKey(),
-  clientId: uuid("client_id").notNull().references(() => users.id), // Fix: Change from integer to uuid
+  clientId: integer("client_id").notNull().references(() => clients.id), // Reference clients.id (serial)
   workoutId: integer("workout_id").notNull().references(() => workouts.id),
   programId: integer("program_id").references(() => programs.id),
   date: date("date").notNull(),

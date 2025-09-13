@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import crypto from "crypto";
 import { storage } from "./storage";
+import { SupabaseStorage } from "./supabase-storage";
 import {
   insertUserSchema,
   insertClientSchema,
@@ -74,14 +75,14 @@ const upload = multer({
 
 // Supabase client setup for JWT verification
 // Use working Supabase URL (temporary fix for environment variable caching)
-const supabaseUrl = 'https://vdykrlyybwwbcqqcgjbp.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkeWtybHl5Yndda3QicWN3d2dqYnAiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNzI0NTExMzY4LCJleHAiOjIwNDAwODczNjh9.mRaH5dQKv8lkEH-iFwjEYq4AGt-dXCvgrnEyUwdvEME';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables must be set');
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY environment variables must be set');
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Rate limiting configuration
 const authRateLimit = rateLimit({
@@ -101,9 +102,17 @@ const generalRateLimit = rateLimit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Add CORS headers for mobile compatibility
+  // Add CORS headers with secure allowlist
   app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5000', 
+      'https://your-app-domain.replit.app' // Replace with actual domain
+    ];
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -116,6 +125,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     next();
   });
+
+  // Helper function to get RLS-aware storage with JWT token
+  const getRlsStorage = (req: Request): SupabaseStorage => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace(/^Bearer\s+/i, '').replace(/^"(.*)"$/, '$1');
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      throw new Error('Valid JWT token required for RLS enforcement');
+    }
+    
+    return SupabaseStorage.withUserToken(token);
+  };
 
   // No session setup needed - using Supabase JWT tokens
 
@@ -220,34 +241,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply general rate limiting to all other API routes
   apiRouter.use(generalRateLimit);
   
-  // Test endpoint to verify database connectivity
-  apiRouter.get('/test/db', async (req, res) => {
+  // Secure health check endpoint - no database credentials exposed
+  apiRouter.get('/health', async (req, res) => {
     try {
-      // Simple database test without using our schema
-      const postgres = (await import('postgres')).default;
-      if (!process.env.DATABASE_URL) {
-        return res.status(500).json({ 
-          success: false, 
-          message: 'DATABASE_URL environment variable not set' 
-        });
-      }
-      // Use correct Supabase Transaction pooler URL (temp fix for env var caching)
-      const correctDatabaseUrl = 'postgresql://postgres.vdykrlyybwwbcqqcgjbp:twRRKUJ8wSo6QFWC@aws-1-eu-central-1.pooler.supabase.com:6543/postgres';
-      const client = postgres(correctDatabaseUrl, { prepare: false });
-      const result = await client`SELECT COUNT(*) as count FROM users`;
-      await client.end();
-      
       res.json({ 
         success: true, 
-        message: 'Database connection working',
-        userCount: result[0].count,
+        message: 'API is healthy',
         timestamp: new Date().toISOString()
       });
     } catch (error: any) {
       res.status(500).json({ 
         success: false, 
-        message: 'Database connection failed',
-        error: error.message 
+        message: 'Health check failed'
       });
     }
   });
@@ -375,95 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  apiRouter.post('/auth/register-simple', async (req, res) => {
-    const startTime = Date.now();
-    
-    try {
-      console.log('🔍 Simple registration attempt:', { 
-        email: req.body.email, 
-        username: req.body.username,
-        role: req.body.role 
-      });
-      
-      const { username, email, password, firstName, lastName, role } = req.body;
-      
-      // Validate required fields
-      if (!username || !email || !password || !firstName || !lastName) {
-        return res.status(400).json({ message: 'All fields are required' });
-      }
-      
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-      console.log('✅ Password hashed');
-      
-      // Create user directly with postgres
-      const postgres = (await import('postgres')).default;
-      if (!process.env.DATABASE_URL) {
-        return res.status(500).json({ 
-          success: false, 
-          message: 'DATABASE_URL environment variable not set' 
-        });
-      }
-      const client = postgres(process.env.DATABASE_URL, { prepare: false });
-      
-      // Check if user exists
-      const existingUser = await client`
-        SELECT id FROM users WHERE email = ${email} OR username = ${username}
-      `;
-      
-      if (existingUser.length > 0) {
-        await client.end();
-        return res.status(400).json({ message: 'User already exists' });
-      }
-      
-      // Try to insert user, let database generate UUID if possible
-      let result;
-      try {
-        // First try without explicit ID (let database generate)
-        result = await client`
-          INSERT INTO users (username, email, first_name, last_name, role)
-          VALUES (${username}, ${email}, ${firstName}, ${lastName}, ${role || 'client'})
-          RETURNING id, username, email, first_name, last_name, role, created_at
-        `;
-      } catch (error: any) {
-        if (error.message.includes('null value in column "id"')) {
-          // If database doesn't auto-generate, create UUID manually
-          const userId = crypto.randomUUID();
-          result = await client`
-            INSERT INTO users (id, username, email, first_name, last_name, role)
-            VALUES (${userId}, ${username}, ${email}, ${firstName}, ${lastName}, ${role || 'client'})
-            RETURNING id, username, email, first_name, last_name, role, created_at
-          `;
-        } else {
-          throw error; // Re-throw if it's a different error
-        }
-      }
-      
-      await client.end();
-      
-      const user = result[0];
-      console.log('✅ User created:', { id: user.id, email: user.email });
-      
-      // Create a session manually (if session middleware is available)
-      if ((req as any).session) {
-        (req as any).session.userId = user.id;
-        (req as any).session.user = user;
-      }
-      
-      const duration = Date.now() - startTime;
-      console.log(`✅ Simple registration completed in ${duration}ms`);
-      
-      res.status(201).json({ 
-        success: true,
-        user: user
-      });
-      
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-      console.log(`❌ Simple registration failed after ${duration}ms:`, error.message);
-      res.status(500).json({ message: 'Registration failed', error: error.message });
-    }
-  });
+  // REMOVED: Insecure registration endpoint that bypassed RLS
   
   // Original registration endpoint with debugging and error handling
   apiRouter.post('/auth/register', async (req, res) => {
@@ -653,69 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple login endpoint that works with our database structure
-  apiRouter.post('/auth/login-simple', async (req, res) => {
-    const startTime = Date.now();
-    
-    try {
-      console.log('🔍 Simple login attempt:', { username: req.body.username });
-      
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
-      }
-      
-      // Query user directly with postgres
-      const postgres = (await import('postgres')).default;
-      if (!process.env.DATABASE_URL) {
-        return res.status(500).json({ 
-          success: false, 
-          message: 'DATABASE_URL environment variable not set' 
-        });
-      }
-      const client = postgres(process.env.DATABASE_URL, { prepare: false });
-      
-      const users = await client`
-        SELECT id, username, email, first_name, last_name, role, created_at
-        FROM users 
-        WHERE username = ${username}
-      `;
-      
-      if (users.length === 0) {
-        await client.end();
-        console.log('❌ User not found:', username);
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-      
-      const user = users[0];
-      console.log('✅ User found:', { id: user.id, email: user.email, role: user.role });
-      
-      // Note: For demo purposes, we'll skip password verification
-      // In production, you'd verify the hashed password here
-      
-      await client.end();
-      
-      // Create session manually (if session middleware is available)
-      if ((req as any).session) {
-        (req as any).session.userId = user.id;
-        (req as any).session.user = user;
-      }
-      
-      const duration = Date.now() - startTime;
-      console.log(`✅ Simple login completed in ${duration}ms`);
-      
-      res.json({ 
-        success: true,
-        user: user
-      });
-      
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-      console.log(`❌ Simple login failed after ${duration}ms:`, error.message);
-      res.status(500).json({ message: 'Login failed', error: error.message });
-    }
-  });
+  // REMOVED: Insecure login endpoint that bypassed password verification and RLS
 
   apiRouter.post('/auth/login', (req, res, next) => {
     passport.authenticate('local', (err: any, user: any, info: any) => {
@@ -824,7 +679,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Weight logging routes
   apiRouter.post('/weight-logs', isAuthenticated, async (req, res) => {
     try {
-      const clientId = req.body.clientId || (await storage.getClientByUserId((req.user as any).id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = req.body.clientId || (await rlsStorage.getClientByUserId((req.user as any).id))?.id;
       if (!clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
@@ -834,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clientId
       });
       
-      const weightLog = await storage.createWeightLog(weightLogData);
+      const weightLog = await rlsStorage.createWeightLog(weightLogData);
       res.status(201).json(weightLog);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -847,14 +703,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/weight-logs', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const clientId = parseInt(req.query.clientId as string) || (await storage.getClientByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = parseInt(req.query.clientId as string) || (await rlsStorage.getClientByUserId(user.id))?.id;
       
       if (!clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
       
-      // Check if user is authorized to access these logs
-      if (user.role !== 'admin' && (await storage.getClientByUserId(user.id))?.id !== clientId) {
+      // RLS will handle authorization checks, but we still do explicit checks for transparency
+      if (user.role !== 'admin' && (await rlsStorage.getClientByUserId(user.id))?.id !== clientId) {
         return res.status(403).json({ message: 'Unauthorized to access these weight logs' });
       }
       
@@ -862,9 +719,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.startDate && req.query.endDate) {
         const startDate = new Date(req.query.startDate as string);
         const endDate = new Date(req.query.endDate as string);
-        weightLogs = await storage.getWeightLogsByClientIdAndDateRange(clientId, startDate, endDate);
+        weightLogs = await rlsStorage.getWeightLogsByClientIdAndDateRange(clientId, startDate, endDate);
       } else {
-        weightLogs = await storage.getWeightLogsByClientId(clientId);
+        weightLogs = await rlsStorage.getWeightLogsByClientId(clientId);
       }
       
       res.json(weightLogs);
@@ -880,7 +737,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No photo uploaded' });
       }
       
-      const clientId = req.body.clientId || (await storage.getClientByUserId((req.user as any).id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = req.body.clientId || (await rlsStorage.getClientByUserId((req.user as any).id))?.id;
       if (!clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
@@ -895,7 +753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes
       });
       
-      const photo = await storage.createProgressPhoto(photoData);
+      const photo = await rlsStorage.createProgressPhoto(photoData);
       res.status(201).json(photo);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -908,18 +766,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/progress-photos', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const clientId = parseInt(req.query.clientId as string) || (await storage.getClientByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = parseInt(req.query.clientId as string) || (await rlsStorage.getClientByUserId(user.id))?.id;
       
       if (!clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
       
-      // Check if user is authorized to access these photos
-      if (user.role !== 'admin' && (await storage.getClientByUserId(user.id))?.id !== clientId) {
+      // RLS will handle authorization checks, but we still do explicit checks for transparency
+      if (user.role !== 'admin' && (await rlsStorage.getClientByUserId(user.id))?.id !== clientId) {
         return res.status(403).json({ message: 'Unauthorized to access these progress photos' });
       }
       
-      const photos = await storage.getProgressPhotosByClientId(clientId);
+      const photos = await rlsStorage.getProgressPhotosByClientId(clientId);
       res.json(photos);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching progress photos' });
@@ -936,7 +795,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can create check-ins' });
       }
       
-      const coachId = (await storage.getCoachByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const coachId = (await rlsStorage.getCoachByUserId(user.id))?.id;
       if (!coachId) {
         return res.status(400).json({ message: 'Coach profile not found' });
       }
@@ -946,7 +806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         coachId
       });
       
-      const checkin = await storage.createCheckin(checkinData);
+      const checkin = await rlsStorage.createCheckin(checkinData);
       res.status(201).json(checkin);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -961,8 +821,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as any;
       
+      const rlsStorage = getRlsStorage(req);
       // Get client ID from the logged-in user
-      const clientId = (await storage.getClientByUserId(user.id))?.id;
+      const clientId = (await rlsStorage.getClientByUserId(user.id))?.id;
       let client;
       
       if (!clientId) {
@@ -975,13 +836,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dateOfBirth: null,
           coachId: null
         };
-        client = await storage.createClient(clientData);
+        client = await rlsStorage.createClient(clientData);
         if (!client) {
           return res.status(500).json({ message: 'Failed to create client profile' });
         }
       } else {
         // Get the client again or use the one we already have
-        client = await storage.getClientByUserId(user.id);
+        client = await rlsStorage.getClientByUserId(user.id);
       }
       
       // Get a coach to assign - in this case, we'll use a default coach ID
@@ -1011,7 +872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Creating check-in with data:', checkinData);
       
-      const checkin = await storage.createCheckin(checkinData);
+      const checkin = await rlsStorage.createCheckin(checkinData);
       console.log('Check-in created:', checkin);
       res.status(201).json(checkin);
     } catch (error) {
@@ -1032,21 +893,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/checkins', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const clientId = parseInt(req.query.clientId as string) || (await storage.getClientByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = parseInt(req.query.clientId as string) || (await rlsStorage.getClientByUserId(user.id))?.id;
       
       if (user.role !== 'admin' && !clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
       
-      // Check if user is authorized to access these check-ins
-      if (user.role !== 'admin' && (await storage.getClientByUserId(user.id))?.id !== clientId) {
+      // RLS will handle authorization checks, but we still do explicit checks for transparency
+      if (user.role !== 'admin' && (await rlsStorage.getClientByUserId(user.id))?.id !== clientId) {
         return res.status(403).json({ message: 'Unauthorized to access these check-ins' });
       }
       
       const upcoming = req.query.upcoming === 'true';
       const checkins = upcoming 
-        ? await storage.getUpcomingCheckinsByClientId(clientId!)
-        : await storage.getCheckinsByClientId(clientId!);
+        ? await rlsStorage.getUpcomingCheckinsByClientId(clientId!)
+        : await rlsStorage.getCheckinsByClientId(clientId!);
       
       res.json(checkins);
     } catch (error) {
@@ -1063,7 +925,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Invalid status' });
       }
       
-      const checkin = await storage.updateCheckinStatus(parseInt(id), status);
+      const rlsStorage = getRlsStorage(req);
+      const checkin = await rlsStorage.updateCheckinStatus(parseInt(id), status);
       res.json(checkin);
     } catch (error) {
       res.status(500).json({ message: 'Server error updating check-in status' });
@@ -1080,7 +943,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         senderId
       });
       
-      const message = await storage.createMessage(messageData);
+      const rlsStorage = getRlsStorage(req);
+      const message = await rlsStorage.createMessage(messageData);
       res.status(201).json(message);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -1095,12 +959,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req.user as any).id;
       
       if (req.query.otherUserId) {
-        const otherUserId = parseInt(req.query.otherUserId as string);
-        const conversation = await storage.getConversation(userId, otherUserId);
+        const otherUserId = req.query.otherUserId as string;
+        const rlsStorage = getRlsStorage(req);
+        const conversation = await rlsStorage.getConversation(userId, otherUserId);
         return res.json(conversation);
       }
       
-      const messages = await storage.getMessagesByUserId(userId);
+      const rlsStorage = getRlsStorage(req);
+      const messages = await rlsStorage.getMessagesByUserId(userId);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching messages' });
@@ -1110,7 +976,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.patch('/messages/:id/read', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const message = await storage.markMessageAsRead(parseInt(id));
+      const rlsStorage = getRlsStorage(req);
+      const message = await rlsStorage.markMessageAsRead(parseInt(id));
       res.json(message);
     } catch (error) {
       res.status(500).json({ message: 'Server error marking message as read' });
@@ -1127,7 +994,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can create nutrition plans' });
       }
       
-      const coachId = (await storage.getCoachByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const coachId = (await rlsStorage.getCoachByUserId(user.id))?.id;
       if (!coachId) {
         return res.status(400).json({ message: 'Coach profile not found' });
       }
@@ -1137,7 +1005,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         coachId
       });
       
-      const nutritionPlan = await storage.createNutritionPlan(nutritionPlanData);
+      const nutritionPlan = await rlsStorage.createNutritionPlan(nutritionPlanData);
       res.status(201).json(nutritionPlan);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -1150,25 +1018,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/nutrition-plans', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const clientId = parseInt(req.query.clientId as string) || (await storage.getClientByUserId(user.id))?.id;
+      const rlsStorage = getRlsStorage(req);
+      const clientId = parseInt(req.query.clientId as string) || (await rlsStorage.getClientByUserId(user.id))?.id;
       
       if (!clientId) {
         return res.status(400).json({ message: 'Client profile not found' });
       }
       
-      // Check if user is authorized to access these nutrition plans
-      if (user.role !== 'admin' && (await storage.getClientByUserId(user.id))?.id !== clientId) {
+      // RLS will handle authorization checks, but we still do explicit checks for transparency
+      if (user.role !== 'admin' && (await rlsStorage.getClientByUserId(user.id))?.id !== clientId) {
         return res.status(403).json({ message: 'Unauthorized to access these nutrition plans' });
       }
       
       const currentOnly = req.query.current === 'true';
       
       if (currentOnly) {
-        const currentPlan = await storage.getCurrentNutritionPlan(clientId);
+        const currentPlan = await rlsStorage.getCurrentNutritionPlan(clientId);
         return res.json(currentPlan || null);
       }
       
-      const nutritionPlans = await storage.getNutritionPlansByClientId(clientId);
+      const nutritionPlans = await rlsStorage.getNutritionPlansByClientId(clientId);
       res.json(nutritionPlans);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching nutrition plans' });
@@ -1178,7 +1047,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Device integration routes
   apiRouter.get('/integrations', isAuthenticated, async (req, res) => {
     try {
-      const integrations = await storage.getDeviceIntegrationsByUserId((req.user as any).id);
+      const rlsStorage = getRlsStorage(req);
+      const integrations = await rlsStorage.getDeviceIntegrationsByUserId((req.user as any).id);
       res.json(integrations);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching integrations' });
@@ -1192,15 +1062,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: (req.user as any).id
       };
       
+      const rlsStorage = getRlsStorage(req);
       // Check if integration already exists
-      const existingIntegration = await storage.getDeviceIntegrationByUserId(
+      const existingIntegration = await rlsStorage.getDeviceIntegrationByUserId(
         (req.user as any).id, 
         integrationData.provider
       );
       
       if (existingIntegration) {
         // Update existing integration
-        const updated = await storage.updateDeviceIntegration(
+        const updated = await rlsStorage.updateDeviceIntegration(
           existingIntegration.id,
           integrationData
         );
@@ -1208,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create new integration
-      const created = await storage.createDeviceIntegration(integrationData);
+      const created = await rlsStorage.createDeviceIntegration(integrationData);
       res.status(201).json(created);
     } catch (error) {
       res.status(500).json({ message: 'Server error creating integration' });
@@ -1219,15 +1090,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const integrationId = parseInt(req.params.id);
       
+      const rlsStorage = getRlsStorage(req);
       // Check if integration exists and belongs to user
-      const integrations = await storage.getDeviceIntegrationsByUserId((req.user as any).id);
+      const integrations = await rlsStorage.getDeviceIntegrationsByUserId((req.user as any).id);
       const userOwnsIntegration = integrations.some(i => i.id === integrationId);
       
       if (!userOwnsIntegration) {
         return res.status(403).json({ message: 'Unauthorized to delete this integration' });
       }
       
-      await storage.deleteDeviceIntegration(integrationId);
+      await rlsStorage.deleteDeviceIntegration(integrationId);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: 'Server error deleting integration' });
@@ -1244,9 +1116,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Missing required fields' });
       }
       
+      // For webhook, we need to use service account or admin token for RLS
+      // Since webhooks don't have user context, we'll use the admin token
+      const rlsStorage = new SupabaseStorage(); // Admin context for webhook
+      
       // Verify the token matches the stored token for this integration
-      const integration = await storage.getDeviceIntegrationByUserId(
-        parseInt(userId), 
+      const integration = await rlsStorage.getDeviceIntegrationByUserId(
+        userId, 
         'feelfit'
       );
       
@@ -1255,7 +1131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the client associated with this user
-      const client = await storage.getClientByUserId(parseInt(userId));
+      const client = await rlsStorage.getClientByUserId(userId);
       if (!client) {
         return res.status(404).json({ message: 'Client not found' });
       }
@@ -1268,10 +1144,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: 'Recorded from Feelfit scale'
       };
       
-      const created = await storage.createWeightLog(weightLog);
+      const created = await rlsStorage.createWeightLog(weightLog);
       
       // Update the integration's last synced timestamp
-      await storage.updateDeviceIntegration(integration.id, {
+      await rlsStorage.updateDeviceIntegration(integration.id, {
         lastSyncedAt: new Date(),
       });
       
@@ -1285,7 +1161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exercise management routes
   apiRouter.get('/exercises', isAuthenticated, async (req, res) => {
     try {
-      const exercises = await storage.getExercises();
+      const rlsStorage = getRlsStorage(req);
+      const exercises = await rlsStorage.getExercises();
       res.json(exercises);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching exercises' });
@@ -1299,12 +1176,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can create exercises' });
       }
 
+      const rlsStorage = getRlsStorage(req);
       const exerciseData = insertExerciseSchema.parse({
         ...req.body,
         createdBy: user.id
       });
 
-      const exercise = await storage.createExercise(exerciseData);
+      const exercise = await rlsStorage.createExercise(exerciseData);
       res.status(201).json(exercise);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -1320,10 +1198,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       let programs;
 
+      const rlsStorage = getRlsStorage(req);
       if (user.role === 'admin') {
-        programs = await storage.getProgramsByCoachId(user.id);
+        programs = await rlsStorage.getProgramsByCoachId(user.id);
       } else {
-        programs = await storage.getPrograms();
+        programs = await rlsStorage.getPrograms();
       }
 
       res.json(programs);
@@ -1339,12 +1218,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can create programs' });
       }
 
+      const rlsStorage = getRlsStorage(req);
       const programData = insertProgramSchema.parse({
         ...req.body,
         coachId: user.id
       });
 
-      const program = await storage.createProgram(programData);
+      const program = await rlsStorage.createProgram(programData);
       res.status(201).json(program);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -1379,7 +1259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           notes
         });
 
-        const assignment = await storage.assignProgramToClient(assignmentData);
+        const rlsStorage = getRlsStorage(req);
+        const assignment = await rlsStorage.assignProgramToClient(assignmentData);
         assignments.push(assignment);
       }
 
@@ -1398,10 +1279,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const programId = req.query.programId as string;
       let workouts;
 
+      const rlsStorage = getRlsStorage(req);
       if (programId) {
-        workouts = await storage.getWorkoutsByProgramId(parseInt(programId));
+        workouts = await rlsStorage.getWorkoutsByProgramId(parseInt(programId));
       } else {
-        workouts = await storage.getWorkouts();
+        workouts = await rlsStorage.getWorkouts();
       }
 
       res.json(workouts);
@@ -1419,8 +1301,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { workout, exercises } = req.body;
 
+      const rlsStorage = getRlsStorage(req);
       const workoutData = insertWorkoutSchema.parse(workout);
-      const createdWorkout = await storage.createWorkout(workoutData);
+      const createdWorkout = await rlsStorage.createWorkout(workoutData);
 
       // Add exercises to the workout
       if (exercises && Array.isArray(exercises)) {
@@ -1429,7 +1312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ...exercise,
             workoutId: createdWorkout.id
           });
-          await storage.createWorkoutExercise(exerciseData);
+          await rlsStorage.createWorkoutExercise(exerciseData);
         }
       }
 
@@ -1448,12 +1331,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       let clientPrograms;
 
+      const rlsStorage = getRlsStorage(req);
       if (user.role === 'admin') {
         // Coach viewing all their assigned programs
-        clientPrograms = await storage.getClientProgramsByCoachId(user.id);
+        clientPrograms = await rlsStorage.getClientProgramsByCoachId(user.id);
       } else {
         // Client viewing their own programs
-        clientPrograms = await storage.getClientPrograms(user.id);
+        clientPrograms = await rlsStorage.getClientPrograms(user.id);
       }
 
       res.json(clientPrograms);
@@ -1467,12 +1351,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as any;
       
+      const rlsStorage = getRlsStorage(req);
       const workoutLogData = insertWorkoutLogSchema.parse({
         ...req.body,
         clientId: user.id
       });
 
-      const workoutLog = await storage.createWorkoutLog(workoutLogData);
+      const workoutLog = await rlsStorage.createWorkoutLog(workoutLogData);
       res.status(201).json(workoutLog);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -1487,21 +1372,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const clientId = parseInt(req.query.clientId as string) || user.id;
 
-      // Check authorization
+      const rlsStorage = getRlsStorage(req);
+      // RLS will handle authorization checks, but we still do explicit checks for transparency
       if (user.role !== 'admin' && clientId !== user.id) {
         return res.status(403).json({ message: 'Unauthorized to access these workout logs' });
       }
 
-      const workoutLogs = await storage.getWorkoutLogsByClientId(clientId);
+      const workoutLogs = await rlsStorage.getWorkoutLogsByClientId(clientId);
       
       // Enhance workout logs with full workout details
       const enhancedLogs = await Promise.all(workoutLogs.map(async (log) => {
-        const workout = await storage.getWorkout(log.workoutId);
-        const workoutExercises = await storage.getWorkoutExercisesByWorkoutId(log.workoutId);
+        const workout = await rlsStorage.getWorkout(log.workoutId);
+        const workoutExercises = await rlsStorage.getWorkoutExercisesByWorkoutId(log.workoutId);
         
         // Get exercise details for each workout exercise
         const enhancedExercises = await Promise.all(workoutExercises.map(async (we) => {
-          const exercise = await storage.getExercise(we.exerciseId);
+          const exercise = await rlsStorage.getExercise(we.exerciseId);
           return {
             ...we,
             exercise
@@ -1540,8 +1426,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'First name, last name, email, and package type are required' });
       }
 
+      // Extract JWT token for RLS enforcement
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.replace(/^Bearer\s+/i, '').replace(/^"(.*)"$/, '$1');
+      
+      if (!token || token === 'null' || token === 'undefined') {
+        return res.status(401).json({ message: 'Valid JWT token required for RLS enforcement' });
+      }
+
+      // Use RLS-aware storage with JWT token for security
+      const rlsStorage = SupabaseStorage.withUserToken(token);
+
       // Check if user with this email already exists
-      const existingUser = await storage.getUserByEmail(email);
+      const existingUser = await rlsStorage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'User with this email already exists' });
       }
@@ -1557,18 +1454,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: 'client' as const
       };
 
-      const newUser = await storage.createUser(userData);
+      const newUser = await rlsStorage.createUser(userData);
 
-      // Create client profile
+      // Get the coach ID for the authenticated user (with RLS)
+      const coach = await rlsStorage.getCoachByUserId(user.id);
+      if (!coach) {
+        return res.status(400).json({ message: 'Coach profile not found. Please contact support.' });
+      }
+
+      // Create client profile with proper audit trail (RLS-enforced)
       const clientData = {
         userId: newUser.id, // This is now a UUID string
+        coachId: coach.id, // Assign client to the creating coach
         phone: phone || null,
         packageType,
         goals: goals || null,
-        notes: notes || null
+        notes: notes || null,
+        createdBy: user.id // Track who created this client
       };
 
-      const client = await storage.createClient(clientData);
+      const client = await rlsStorage.createClient(clientData);
 
       res.status(201).json({
         success: true,
@@ -1593,7 +1498,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can view all clients' });
       }
 
-      const clients = await storage.getAllClients();
+      // Extract JWT token for RLS enforcement
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.replace(/^Bearer\s+/i, '').replace(/^"(.*)"$/, '$1');
+      
+      if (!token || token === 'null' || token === 'undefined') {
+        return res.status(401).json({ message: 'Valid JWT token required for RLS enforcement' });
+      }
+
+      // Use RLS-aware storage with JWT token
+      const rlsStorage = SupabaseStorage.withUserToken(token);
+      const clients = await rlsStorage.getAllClients();
       res.json(clients);
     } catch (error) {
       console.error('Error fetching clients:', error);

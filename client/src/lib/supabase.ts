@@ -131,7 +131,7 @@ export const db = {
     
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        query = query.eq(key, value)
+        query = query.eq(key, value as string | number)
       })
     }
     
@@ -151,7 +151,7 @@ export const db = {
     return result as T
   },
   
-  async update<T>(table: string, id: number | string, updates: any): Promise<T> {
+  async update<T>(table: string, id: number | string, updates: Record<string, any>): Promise<T> {
     const { data, error } = await supabase
       .from(table)
       .update(updates)
