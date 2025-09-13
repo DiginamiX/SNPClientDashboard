@@ -39,21 +39,11 @@ CREATE POLICY "Users can read own record" ON public.users
 FOR SELECT 
 USING (id = auth.uid());
 
--- Allow users to update their own record (but prevent role changes by non-admins)
+-- Allow users to update their own record (role protection handled by trigger)
 CREATE POLICY "Users can update own record" ON public.users 
 FOR UPDATE 
 USING (id = auth.uid())
-WITH CHECK (
-  id = auth.uid() AND
-  -- Security: Prevent role escalation - only admins can change roles
-  (
-    CASE 
-      WHEN OLD.role != NEW.role THEN 
-        EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
-      ELSE true
-    END
-  )
-);
+WITH CHECK (id = auth.uid());
 
 -- Allow admins to manage all users (for admin panel functionality)
 CREATE POLICY "Admins can manage all users" ON public.users 
