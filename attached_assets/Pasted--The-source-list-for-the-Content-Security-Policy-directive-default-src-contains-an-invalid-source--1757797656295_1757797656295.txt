@@ -1,0 +1,208 @@
+
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+SNPClientDashboard:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+SNPClientDashboard:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+SNPClientDashboard:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ [LaunchDarkly] LaunchDarkly client initialized
+ Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'battery'.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'layout-animations'.
+_ @ framework-87e4a596bb9cb438.js:1
+ Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-87e4a596bb9cb438.js:1
+framework-87e4a596bb9cb438.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-87e4a596bb9cb438.js:1
+workspace_iframe.html:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 Auth state changed: TOKEN_REFRESHED roberto+coach2@diginamix.marketing
+Console.js:61 🔍 Making authenticated query to: /api/weight-logs
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ❌ No JWT token found. Session details: Object
+Console.js:61 🔍 Final headers include Authorization: false
+Console.js:61 🔍 Making authenticated query to: /api/progress-photos
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ❌ No JWT token found. Session details: Object
+Console.js:61 🔍 Final headers include Authorization: false
+Console.js:61 🔍 Making authenticated query to: /api/checkins
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ❌ No JWT token found. Session details: Object
+Console.js:61 🔍 Final headers include Authorization: false
+Console.js:61 🔍 Making authenticated query to: /api/messages
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ❌ No JWT token found. Session details: Object
+Console.js:61 🔍 Final headers include Authorization: false
+Console.js:61 🔍 Making authenticated query to: /api/nutrition-plans
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ❌ No JWT token found. Session details: Object
+Console.js:61 🔍 Final headers include Authorization: false
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🏠 Layout role check: Object
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/weight-logs:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🔍 Query response status: 401
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/checkins:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🔍 Query response status: 401
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/progress-photos:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🔍 Query response status: 401
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/messages:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🔍 Query response status: 401
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/nutrition-plans:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+Console.js:61 🔍 Query response status: 401
+SNPClientDashboard:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ✅ JWT token found for API request. Token length: 1011
+Console.js:61 🔍 Final headers include Authorization: true
+Console.js:61 🏠 Layout role check: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🏠 Layout role check: Object
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/clients:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Console.js:61 Error fetching clients: Error: 500: {"message":"Server error fetching clients"}
+    at throwIfResNotOk (queryClient.ts:8:11)
+    at async apiRequest (queryClient.ts:55:5)
+    at async queryFn (ClientManagement.tsx:157:26)
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🔍 Starting add client mutation with data: Object
+Console.js:61 🔍 Getting auth headers from session...
+Console.js:61 ✅ JWT token found for API request. Token length: 1011
+Console.js:61 🔍 Final headers include Authorization: true
+e7c2cd6c-399f-41f2-880d-8969f4ef330e-00-2csogul917ov1.kirk.replit.dev/api/clients:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Console.js:61 ❌ Add client mutation failed: Error: 500: {"message":"Server error creating client","error":"new row violates row-level security policy for table \"users\""}
+    at throwIfResNotOk (queryClient.ts:8:11)
+    at async apiRequest (queryClient.ts:55:5)
+    at async Object.mutationFn (ClientManagement.tsx:110:26)
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 🔍 Clients query state: Object
+Console.js:61 🏠 Layout role check: Object
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.

@@ -209,7 +209,7 @@ export class SupabaseStorage implements IStorage {
       .from('clients')
       .select(`
         *,
-        users (
+        users!clients_user_id_fkey (
           username,
           email,
           first_name,
