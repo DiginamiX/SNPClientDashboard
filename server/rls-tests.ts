@@ -61,6 +61,40 @@ async function createTestUsers(): Promise<void> {
   COACH_A_TOKEN = coachASession.data.session.access_token;
   console.log('✅ Coach A created with JWT token');
   
+  // CRITICAL FIX: Create public.users record for Coach A BEFORE creating coach profile
+  const coachAUser = await supabase.auth.getUser(COACH_A_TOKEN);
+  if (!coachAUser.data.user) {
+    throw new Error('Failed to get Coach A user data from JWT token');
+  }
+  
+  const coachAStorage = SupabaseStorage.withUserToken(COACH_A_TOKEN);
+  console.log('🔨 Creating public.users record for Coach A...');
+  try {
+    await coachAStorage.createUser({
+      id: coachAUser.data.user.id,
+      username: 'coach-a-test',
+      email: 'coach-a-test@example.com',
+      firstName: 'Coach',
+      lastName: 'A',
+      role: 'admin'
+    });
+    console.log('✅ Coach A public.users record created');
+    
+    // Confirm creation by reading back
+    const createdUserA = await coachAStorage.getUser(coachAUser.data.user.id);
+    if (!createdUserA) {
+      throw new Error('Failed to confirm Coach A public.users record creation');
+    }
+    console.log('✅ Coach A public.users record confirmed:', createdUserA.username);
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique constraint violation - user already exists
+      console.log('⚠️ Coach A public.users record already exists, continuing...');
+    } else {
+      console.error('❌ Failed to create Coach A public.users record:', error);
+      throw new Error(`Failed to create Coach A public.users record: ${error.message}`);
+    }
+  }
+  
   // Try to create Coach B, or sign in if already exists
   const coachB = await supabase.auth.signUp({
     email: 'coach-b-test@example.com',
@@ -93,6 +127,40 @@ async function createTestUsers(): Promise<void> {
   
   COACH_B_TOKEN = coachBSession.data.session.access_token;
   console.log('✅ Coach B created with JWT token');
+  
+  // CRITICAL FIX: Create public.users record for Coach B BEFORE creating coach profile
+  const coachBUser = await supabase.auth.getUser(COACH_B_TOKEN);
+  if (!coachBUser.data.user) {
+    throw new Error('Failed to get Coach B user data from JWT token');
+  }
+  
+  const coachBStorage = SupabaseStorage.withUserToken(COACH_B_TOKEN);
+  console.log('🔨 Creating public.users record for Coach B...');
+  try {
+    await coachBStorage.createUser({
+      id: coachBUser.data.user.id,
+      username: 'coach-b-test',
+      email: 'coach-b-test@example.com',
+      firstName: 'Coach',
+      lastName: 'B',
+      role: 'admin'
+    });
+    console.log('✅ Coach B public.users record created');
+    
+    // Confirm creation by reading back
+    const createdUserB = await coachBStorage.getUser(coachBUser.data.user.id);
+    if (!createdUserB) {
+      throw new Error('Failed to confirm Coach B public.users record creation');
+    }
+    console.log('✅ Coach B public.users record confirmed:', createdUserB.username);
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique constraint violation - user already exists
+      console.log('⚠️ Coach B public.users record already exists, continuing...');
+    } else {
+      console.error('❌ Failed to create Coach B public.users record:', error);
+      throw new Error(`Failed to create Coach B public.users record: ${error.message}`);
+    }
+  }
   
   // Try to create Client A, or sign in if already exists
   const clientA = await supabase.auth.signUp({
@@ -127,6 +195,40 @@ async function createTestUsers(): Promise<void> {
   CLIENT_A_TOKEN = clientASession.data.session.access_token;
   console.log('✅ Client A created with JWT token');
   
+  // CRITICAL FIX: Create public.users record for Client A
+  const clientAUser = await supabase.auth.getUser(CLIENT_A_TOKEN);
+  if (!clientAUser.data.user) {
+    throw new Error('Failed to get Client A user data from JWT token');
+  }
+  
+  const clientAStorage = SupabaseStorage.withUserToken(CLIENT_A_TOKEN);
+  console.log('🔨 Creating public.users record for Client A...');
+  try {
+    await clientAStorage.createUser({
+      id: clientAUser.data.user.id,
+      username: 'client-a-test',
+      email: 'client-a-test@example.com',
+      firstName: 'Client',
+      lastName: 'A',
+      role: 'client'
+    });
+    console.log('✅ Client A public.users record created');
+    
+    // Confirm creation by reading back
+    const createdClientA = await clientAStorage.getUser(clientAUser.data.user.id);
+    if (!createdClientA) {
+      throw new Error('Failed to confirm Client A public.users record creation');
+    }
+    console.log('✅ Client A public.users record confirmed:', createdClientA.username);
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique constraint violation - user already exists
+      console.log('⚠️ Client A public.users record already exists, continuing...');
+    } else {
+      console.error('❌ Failed to create Client A public.users record:', error);
+      throw new Error(`Failed to create Client A public.users record: ${error.message}`);
+    }
+  }
+  
   // Try to create Client B, or sign in if already exists
   const clientB = await supabase.auth.signUp({
     email: 'client-b-test@example.com',
@@ -160,7 +262,41 @@ async function createTestUsers(): Promise<void> {
   CLIENT_B_TOKEN = clientBSession.data.session.access_token;
   console.log('✅ Client B created with JWT token');
   
-  console.log('🎉 All test users created with real JWT tokens');
+  // CRITICAL FIX: Create public.users record for Client B
+  const clientBUser = await supabase.auth.getUser(CLIENT_B_TOKEN);
+  if (!clientBUser.data.user) {
+    throw new Error('Failed to get Client B user data from JWT token');
+  }
+  
+  const clientBStorage = SupabaseStorage.withUserToken(CLIENT_B_TOKEN);
+  console.log('🔨 Creating public.users record for Client B...');
+  try {
+    await clientBStorage.createUser({
+      id: clientBUser.data.user.id,
+      username: 'client-b-test',
+      email: 'client-b-test@example.com',
+      firstName: 'Client',
+      lastName: 'B',
+      role: 'client'
+    });
+    console.log('✅ Client B public.users record created');
+    
+    // Confirm creation by reading back
+    const createdClientB = await clientBStorage.getUser(clientBUser.data.user.id);
+    if (!createdClientB) {
+      throw new Error('Failed to confirm Client B public.users record creation');
+    }
+    console.log('✅ Client B public.users record confirmed:', createdClientB.username);
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique constraint violation - user already exists
+      console.log('⚠️ Client B public.users record already exists, continuing...');
+    } else {
+      console.error('❌ Failed to create Client B public.users record:', error);
+      throw new Error(`Failed to create Client B public.users record: ${error.message}`);
+    }
+  }
+  
+  console.log('🎉 All test users created with real JWT tokens AND public.users records');
 }
 
 /**
@@ -230,27 +366,49 @@ async function testClientDataIsolation(): Promise<void> {
   console.log('✅ Coach A ID:', coachAUser.user.id);
   console.log('✅ Coach B ID:', coachBUser.user.id);
   
-  // First create coach profiles if they don't exist
+  // First create coach profiles - with proper error handling
+  console.log('🔨 Creating Coach A profile...');
   try {
     await coachAStorage.createCoach({
       userId: coachAUser.user.id,
       specialization: 'Weight Loss',
       bio: 'Coach A Test Bio - Certified Personal Trainer'
     });
-    console.log('✅ Coach A profile created');
-  } catch (error) {
-    console.log('⚠️ Coach A profile may already exist');
+    console.log('✅ Coach A profile created successfully');
+  } catch (error: any) {
+    console.error('❌ Error creating Coach A profile:', error);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error message:', error.message);
+    
+    // Only continue if it's a duplicate key error (coach already exists)
+    if (error.code === '23505' || error.message?.includes('already exists') || error.message?.includes('duplicate')) {
+      console.log('⚠️ Coach A profile already exists, continuing...');
+    } else {
+      // FAIL FAST on any other error - don't continue with broken state
+      throw new Error(`CRITICAL: Failed to create Coach A profile: ${error.message} (code: ${error.code})`);
+    }
   }
   
+  console.log('🔨 Creating Coach B profile...');
   try {
     await coachBStorage.createCoach({
       userId: coachBUser.user.id,
       specialization: 'Strength Training',
       bio: 'Coach B Test Bio - Certified Strength Coach'
     });
-    console.log('✅ Coach B profile created');
-  } catch (error) {
-    console.log('⚠️ Coach B profile may already exist');
+    console.log('✅ Coach B profile created successfully');
+  } catch (error: any) {
+    console.error('❌ Error creating Coach B profile:', error);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error message:', error.message);
+    
+    // Only continue if it's a duplicate key error (coach already exists)
+    if (error.code === '23505' || error.message?.includes('already exists') || error.message?.includes('duplicate')) {
+      console.log('⚠️ Coach B profile already exists, continuing...');
+    } else {
+      // FAIL FAST on any other error - don't continue with broken state
+      throw new Error(`CRITICAL: Failed to create Coach B profile: ${error.message} (code: ${error.code})`);
+    }
   }
   
   // Get the coach records
