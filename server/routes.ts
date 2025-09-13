@@ -230,7 +230,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'DATABASE_URL environment variable not set' 
         });
       }
-      const client = postgres(process.env.DATABASE_URL, { prepare: false });
+      // Use correct Supabase Transaction pooler URL (temp fix for env var caching)
+      const correctDatabaseUrl = 'postgresql://postgres.vdykrlyybwwbcqqcgjbp:twRRKUJ8wSo6QFWC@aws-1-eu-central-1.pooler.supabase.com:6543/postgres';
+      const client = postgres(correctDatabaseUrl, { prepare: false });
       const result = await client`SELECT COUNT(*) as count FROM users`;
       await client.end();
       
