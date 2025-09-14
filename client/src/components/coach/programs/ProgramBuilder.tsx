@@ -128,53 +128,73 @@ export default function ProgramBuilder() {
 
     setSaving(true)
     try {
-      // Create program
-      const { data: program, error: programError } = await supabase
-        .from('programs')
-        .insert({
-          coach_id: user.id,
+      console.log('💾 Saving program:', programData.name)
+      
+      // Create program using API endpoint
+      const response = await fetch('/api/programs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
           name: programData.name,
           description: programData.description,
-          duration_weeks: programData.duration_weeks,
-          difficulty_level: programData.difficulty_level,
-          program_type: programData.program_type,
-          is_template: programData.is_template,
-          is_public: programData.is_public,
+          durationWeeks: programData.duration_weeks,
+          difficultyLevel: programData.difficulty_level,
+          programType: programData.program_type,
+          isTemplate: programData.is_template,
+          isPublic: programData.is_public,
           tags: programData.tags,
-          estimated_hours_per_week: programData.estimated_hours_per_week,
-          target_goals: programData.target_goals
+          estimatedHoursPerWeek: programData.estimated_hours_per_week,
+          targetGoals: programData.target_goals
         })
-        .select()
-        .single()
+      })
 
-      if (programError) throw programError
-
-      // Create workouts
-      const workoutsToInsert = workouts.map(workout => ({
-        program_id: program.id,
-        name: workout.name,
-        description: workout.description,
-        day_number: workout.day_number,
-        week_number: workout.week_number,
-        estimated_duration: workout.estimated_duration,
-        difficulty_rating: workout.difficulty_rating,
-        workout_type: workout.workout_type
-      }))
-
-      if (workoutsToInsert.length > 0) {
-        const { error: workoutsError } = await supabase
-          .from('workouts')
-          .insert(workoutsToInsert)
-
-        if (workoutsError) throw workoutsError
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to create program')
       }
 
+      const program = await response.json()
+      console.log('✅ Program created:', program.id)
+
+      // Create workouts using API endpoint
+      for (const workout of workouts) {
+        const workoutResponse = await fetch('/api/workouts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({
+            workout: {
+              programId: program.id,
+              name: workout.name,
+              description: workout.description,
+              dayNumber: workout.day_number,
+              weekNumber: workout.week_number,
+              estimatedDuration: workout.estimated_duration,
+              difficultyRating: workout.difficulty_rating,
+              workoutType: workout.workout_type
+            },
+            exercises: [] // No exercises for now
+          })
+        })
+
+        if (!workoutResponse.ok) {
+          const errorData = await workoutResponse.json()
+          throw new Error(errorData.message || 'Failed to create workout')
+        }
+      }
+
+      console.log('✅ All workouts created successfully')
       setSavedProgramId(program.id)
       setShowAssignment(true)
 
     } catch (error) {
-      console.error('Error saving program:', error)
-      // TODO: Show error toast
+      console.error('❌ Error saving program:', error)
+      alert(`Failed to save program: ${error.message}`)
     } finally {
       setSaving(false)
     }
