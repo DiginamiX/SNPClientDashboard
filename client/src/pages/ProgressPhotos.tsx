@@ -41,6 +41,7 @@ import { ProgressPhoto } from '@/types';
 import { formatDate } from '@/lib/dateUtils';
 import { OptimizedImage, ProgressiveImage } from '@/components/ui/optimized-image';
 import { usePerformanceTracking } from '@/lib/performance';
+import { EnhancedProgressPhotos } from '@/components/enhanced/EnhancedProgressPhotos';
 
 const formSchema = z.object({
   photo: z.instanceof(File).refine(file => file.size > 0, {
@@ -319,93 +320,16 @@ export default function ProgressPhotos() {
           <CardTitle>My Progress Gallery</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-          ) : !photos || photos.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-5xl mb-4 opacity-30">
-                <i className="ri-image-line"></i>
-              </div>
-              <h3 className="text-lg font-medium mb-2">No progress photos yet</h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-4">
-                Start documenting your fitness journey by uploading your first progress photo.
-              </p>
-              <Button 
-                className="bg-primary hover:bg-blue-600"
-                onClick={() => setOpen(true)}
-              >
-                <i className="ri-add-line mr-1"></i> Upload Your First Photo
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {Object.entries(groupedPhotos).map(([monthYear, monthPhotos]) => (
-                <div key={monthYear} className="space-y-4">
-                  <h3 className="text-lg font-semibold border-b pb-2 border-slate-200 dark:border-slate-700">
-                    {monthYear}
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {monthPhotos.map((photo) => (
-                      <Dialog key={photo.id}>
-                        <DialogTrigger asChild>
-                          <div 
-                            className="relative group cursor-pointer aspect-square overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700"
-                            onClick={() => setSelectedPhoto(photo)}
-                          >
-                            <ProgressiveImage
-                              src={photo.imageUrl}
-                              alt={`Progress photo from ${formatDate(photo.date)}`}
-                              className="w-full h-full object-cover transition duration-200 group-hover:scale-105"
-                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                              loading="lazy"
-                              data-testid={`progress-photo-${photo.id}`}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2">
-                              <span className="text-white text-sm font-medium">
-                                {formatDate(photo.date)}
-                              </span>
-                              {photo.category && (
-                                <span className="text-white/80 text-xs">
-                                  {photo.category}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl">
-                          <DialogHeader>
-                            <DialogTitle>{formatDate(photo.date, 'MMMM d, yyyy')}</DialogTitle>
-                            {photo.category && (
-                              <DialogDescription>{photo.category}</DialogDescription>
-                            )}
-                          </DialogHeader>
-                          <div className="p-2">
-                            <OptimizedImage
-                              src={photo.imageUrl}
-                              alt={`Progress photo from ${formatDate(photo.date)}`}
-                              className="w-full max-h-[70vh] object-contain rounded-lg"
-                              sizes="(max-width: 768px) 100vw, 90vw"
-                              priority
-                              data-testid={`progress-photo-modal-${photo.id}`}
-                            />
-                            {photo.notes && (
-                              <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                                <p className="text-sm text-slate-600 dark:text-slate-300">
-                                  {photo.notes}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <EnhancedProgressPhotos
+            photos={photos || []}
+            loading={isLoading}
+            onUpload={(file: File) => {
+              // Integrate with existing upload flow
+              form.setValue('photo', file);
+              setOpen(true);
+            }}
+            className="w-full"
+          />
         </CardContent>
       </Card>
     </div>

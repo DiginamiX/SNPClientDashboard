@@ -33,6 +33,7 @@ import EmailConfirmation from "./pages/EmailConfirmation";
 import Layout from "./components/layout/Layout";
 import { SupabaseAuthProvider } from "./hooks/useSupabaseAuth";
 import { ThemeProvider } from "next-themes";
+import { performanceMonitor } from "./lib/performance";
 
 function Router() {
   const [location] = useLocation();
