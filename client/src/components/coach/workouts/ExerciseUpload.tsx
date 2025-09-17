@@ -42,19 +42,19 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
     name: editExercise?.name || '',
     description: editExercise?.description || '',
     instructions: editExercise?.instructions || '',
-    muscle_groups: editExercise?.muscle_groups || [],
+    muscleGroups: editExercise?.muscleGroups || [],
     equipment: editExercise?.equipment || '',
-    difficulty_level: editExercise?.difficulty_level || 'beginner',
-    category: editExercise?.category || '',
-    calories_per_minute: editExercise?.calories_per_minute || '',
-    is_public: editExercise?.is_public || false,
+    difficultyLevel: editExercise?.difficultyLevel || 'beginner',
+    categoryId: editExercise?.categoryId || '',
+    caloriesPerMinute: editExercise?.caloriesPerMinute || '',
+    isPublic: editExercise?.isPublic || false,
     tags: editExercise?.tags || []
   })
 
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
-  const [videoPreview, setVideoPreview] = useState<string | null>(editExercise?.video_url || null)
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(editExercise?.thumbnail_url || null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(editExercise?.videoUrl || null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(editExercise?.thumbnailUrl || null)
   const [newMuscleGroup, setNewMuscleGroup] = useState('')
   const [newTag, setNewTag] = useState('')
   const [loading, setLoading] = useState(false)
@@ -87,14 +87,14 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
   }
 
   const addMuscleGroup = () => {
-    if (newMuscleGroup && !formData.muscle_groups.includes(newMuscleGroup)) {
-      handleInputChange('muscle_groups', [...formData.muscle_groups, newMuscleGroup])
+    if (newMuscleGroup && !formData.muscleGroups.includes(newMuscleGroup)) {
+      handleInputChange('muscleGroups', [...formData.muscleGroups, newMuscleGroup])
       setNewMuscleGroup('')
     }
   }
 
   const removeMuscleGroup = (muscle: string) => {
-    handleInputChange('muscle_groups', formData.muscle_groups.filter(m => m !== muscle))
+    handleInputChange('muscleGroups', formData.muscleGroups.filter(m => m !== muscle))
   }
 
   const addTag = () => {
@@ -116,21 +116,23 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
     setUploadProgress(0)
 
     try {
-      let video_url = editExercise?.video_url
-      let thumbnail_url = editExercise?.thumbnail_url
+      let videoUrl = editExercise?.videoUrl
+      let thumbnailUrl = editExercise?.thumbnailUrl
 
       // Upload video if provided
       if (videoFile) {
         setUploadProgress(25)
-        const result = await storage.uploadExerciseVideo(videoFile)
-        video_url = result.url
+        // TODO: Implement upload endpoint
+        const result = { url: 'placeholder-video-url' }
+        videoUrl = result.url
       }
 
       // Upload thumbnail if provided
       if (thumbnailFile) {
         setUploadProgress(50)
-        const result = await storage.uploadFile(thumbnailFile, 'exercise-thumbnails')
-        thumbnail_url = result.url
+        // TODO: Implement upload endpoint
+        const result = { url: 'placeholder-thumbnail-url' }
+        thumbnailUrl = result.url
       }
 
       setUploadProgress(75)
@@ -138,9 +140,9 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
       // Create/update exercise in database
       const exerciseData = {
         ...formData,
-        video_url,
-        thumbnail_url,
-        calories_per_minute: formData.calories_per_minute ? parseFloat(formData.calories_per_minute.toString()) : null,
+        videoUrl,
+        thumbnailUrl,
+        calories_per_minute: formData.caloriesPerMinute ? parseFloat(formData.caloriesPerMinute.toString()) : null,
         created_by: user.id,
         updated_at: new Date().toISOString()
       }
@@ -244,7 +246,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                   
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                    <Select value={formData.categoryId} onValueChange={(value) => handleInputChange('categoryId', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -291,7 +293,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="difficulty">Difficulty Level</Label>
-                    <Select value={formData.difficulty_level} onValueChange={(value) => handleInputChange('difficulty_level', value)}>
+                    <Select value={formData.difficultyLevel} onValueChange={(value) => handleInputChange('difficultyLevel', value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -325,7 +327,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                       id="calories"
                       type="number"
                       step="0.1"
-                      value={formData.calories_per_minute}
+                      value={formData.caloriesPerMinute}
                       onChange={(e) => handleInputChange('calories_per_minute', e.target.value)}
                       placeholder="e.g., 8.5"
                     />
@@ -342,7 +344,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                       </SelectTrigger>
                       <SelectContent>
                         {muscleGroupOptions
-                          .filter(muscle => !formData.muscle_groups.includes(muscle))
+                          .filter(muscle => !formData.muscleGroups.includes(muscle))
                           .map(muscle => (
                             <SelectItem key={muscle} value={muscle}>
                               {muscle}
@@ -355,7 +357,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {formData.muscle_groups.map(muscle => (
+                    {formData.muscleGroups.map(muscle => (
                       <Badge key={muscle} variant="secondary" className="gap-1">
                         {muscle}
                         <button
@@ -517,7 +519,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                   </div>
                   <Switch
                     id="public"
-                    checked={formData.is_public}
+                    checked={formData.isPublic}
                     onCheckedChange={(checked) => handleInputChange('is_public', checked)}
                   />
                 </div>
