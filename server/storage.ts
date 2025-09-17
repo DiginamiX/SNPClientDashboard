@@ -9,6 +9,7 @@ import {
   nutritionPlans, type NutritionPlan, type InsertNutritionPlan,
   deviceIntegrations, type DeviceIntegration, type InsertDeviceIntegration,
   exercises, type Exercise, type InsertExercise,
+  exerciseCategories, type ExerciseCategory, type InsertExerciseCategory,
   programs, type Program, type InsertProgram,
   workouts, type Workout, type InsertWorkout,
   workoutExercises, type InsertWorkoutExercise,
@@ -84,6 +85,13 @@ export interface IStorage {
   getExercise(id: number): Promise<Exercise | undefined>;
   updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise>;
   deleteExercise(id: number): Promise<void>;
+
+  // Exercise category operations
+  createExerciseCategory(category: InsertExerciseCategory): Promise<ExerciseCategory>;
+  getExerciseCategories(): Promise<ExerciseCategory[]>;
+  getExerciseCategory(id: number): Promise<ExerciseCategory | undefined>;
+  updateExerciseCategory(id: number, category: Partial<InsertExerciseCategory>): Promise<ExerciseCategory>;
+  deleteExerciseCategory(id: number): Promise<void>;
 
   // Program operations
   createProgram(program: InsertProgram): Promise<Program>;
@@ -482,6 +490,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteExercise(id: number): Promise<void> {
     await db.delete(exercises).where(eq(exercises.id, id));
+  }
+
+  // Exercise category operations
+  async createExerciseCategory(category: InsertExerciseCategory): Promise<ExerciseCategory> {
+    const [created] = await db.insert(exerciseCategories).values(category).returning();
+    return created;
+  }
+
+  async getExerciseCategories(): Promise<ExerciseCategory[]> {
+    return db.select().from(exerciseCategories).orderBy(exerciseCategories.orderIndex, exerciseCategories.name);
+  }
+
+  async getExerciseCategory(id: number): Promise<ExerciseCategory | undefined> {
+    const [category] = await db.select().from(exerciseCategories).where(eq(exerciseCategories.id, id));
+    return category;
+  }
+
+  async updateExerciseCategory(id: number, category: Partial<InsertExerciseCategory>): Promise<ExerciseCategory> {
+    const [updated] = await db
+      .update(exerciseCategories)
+      .set(category)
+      .where(eq(exerciseCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteExerciseCategory(id: number): Promise<void> {
+    await db.delete(exerciseCategories).where(eq(exerciseCategories.id, id));
   }
 
   // Program operations

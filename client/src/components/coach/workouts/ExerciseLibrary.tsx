@@ -8,37 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
-import { supabase } from '@/lib/supabase'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiRequestAuto } from '@/lib/queryClient'
 import ExerciseCard from './ExerciseCard'
 import ExercisePreview from './ExercisePreview'
 import ExerciseUpload from './ExerciseUpload'
-
-interface Exercise {
-  id: number
-  name: string
-  description: string
-  instructions: string
-  muscle_groups: string[]
-  equipment: string
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced'
-  video_url?: string
-  thumbnail_url?: string
-  created_by: string
-  is_public: boolean
-  tags: string[]
-  category: string
-  calories_per_minute?: number
-  created_at: string
-  updated_at: string
-}
-
-interface ExerciseCategory {
-  id: number
-  name: string
-  description: string
-  icon_name: string
-  color_hex: string
-}
+import type { Exercise, ExerciseCategory } from '@shared/schema'
 
 const difficultyColors = {
   beginner: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
@@ -54,9 +29,6 @@ const muscleGroupColors = [
 ]
 
 export default function ExerciseLibrary() {
-  const [exercises, setExercises] = useState<Exercise[]>([])
-  const [categories, setCategories] = useState<ExerciseCategory[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
@@ -68,54 +40,42 @@ export default function ExerciseLibrary() {
   const [activeTab, setActiveTab] = useState('all')
   
   const { user } = useSupabaseAuth()
+  const queryClient = useQueryClient()
 
-  // Fetch exercises and categories
-  useEffect(() => {
-    fetchExercises()
-    fetchCategories()
-  }, [])
+  // Fetch exercises using backend API
+  const { data: exercises = [], isLoading: exercisesLoading } = useQuery<Exercise[]>({
+    queryKey: ['/api/exercises'],
+    enabled: !!user
+  })
 
-  const fetchExercises = async () => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('exercises')
-        .select('*')
-        .or(`is_public.eq.true,created_by.eq.${user?.id}`)
-        .order('name')
+  // Fetch categories using backend API
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<ExerciseCategory[]>({
+    queryKey: ['/api/exercise-categories'],
+    enabled: !!user
+  })
 
-      if (error) throw error
-      setExercises(data || [])
-    } catch (error) {
-      console.error('Error fetching exercises:', error)
-    } finally {
-      setLoading(false)
+  // Create exercise mutation
+  const createExerciseMutation = useMutation({
+    mutationFn: async (exerciseData: any) => {
+      const response = await apiRequestAuto('POST', '/api/exercises', exerciseData)
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/exercises'] })
     }
-  }
+  })
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('exercise_categories')
-        .select('*')
-        .order('name')
-
-      if (error) throw error
-      setCategories(data || [])
-    } catch (error) {
-      console.error('Error fetching categories:', error)
-    }
-  }
+  const loading = exercisesLoading || categoriesLoading
 
   // Get unique values for filters
   const uniqueEquipment = useMemo(() => {
-    const equipment = exercises.map(e => e.equipment).filter(Boolean)
-    return [...new Set(equipment)].sort()
+    const equipment = exercises.map(e => e.equipment).filter((v): v is string => !!v)
+    return Array.from(new Set(equipment)).sort()
   }, [exercises])
 
   const uniqueMuscleGroups = useMemo(() => {
-    const muscleGroups = exercises.flatMap(e => e.muscle_groups || [])
-    return [...new Set(muscleGroups)].sort()
+    const muscleGroups = exercises.flatMap(e => e.muscleGroups || [])
+    return Array.from(new Set(muscleGroups)).sort()
   }, [exercises])
 
   // Filter exercises based on search and filters
@@ -125,25 +85,25 @@ export default function ExerciseLibrary() {
       const matchesSearch = !searchTerm || 
         exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exercise.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        exercise.muscle_groups?.some(mg => mg.toLowerCase().includes(searchTerm.toLowerCase()))
+        exercise.muscleGroups?.some(mg => mg.toLowerCase().includes(searchTerm.toLowerCase()))
 
       // Category filter
-      const matchesCategory = selectedCategory === 'all' || exercise.category === selectedCategory
+      const matchesCategory = selectedCategory === 'all' || String(exercise.categoryId) === selectedCategory
 
       // Difficulty filter
-      const matchesDifficulty = selectedDifficulty === 'all' || exercise.difficulty_level === selectedDifficulty
+      const matchesDifficulty = selectedDifficulty === 'all' || exercise.difficultyLevel === selectedDifficulty
 
       // Equipment filter
       const matchesEquipment = selectedEquipment === 'all' || exercise.equipment === selectedEquipment
 
       // Muscle group filter
       const matchesMuscleGroup = selectedMuscleGroup === 'all' || 
-        exercise.muscle_groups?.includes(selectedMuscleGroup)
+        exercise.muscleGroups?.includes(selectedMuscleGroup)
 
       // Tab filter
       const matchesTab = activeTab === 'all' || 
-        (activeTab === 'my' && exercise.created_by === user?.id) ||
-        (activeTab === 'public' && exercise.is_public)
+        (activeTab === 'my' && exercise.createdBy === user?.id) ||
+        (activeTab === 'public' && exercise.isPublic)
 
       return matchesSearch && matchesCategory && matchesDifficulty && 
              matchesEquipment && matchesMuscleGroup && matchesTab
@@ -151,21 +111,13 @@ export default function ExerciseLibrary() {
   }, [exercises, searchTerm, selectedCategory, selectedDifficulty, selectedEquipment, selectedMuscleGroup, activeTab, user?.id])
 
   const handleExerciseUpdate = (updatedExercise: Exercise) => {
-    setExercises(prev => prev.map(ex => 
-      ex.id === updatedExercise.id ? updatedExercise : ex
-    ))
+    queryClient.invalidateQueries({ queryKey: ['/api/exercises'] })
   }
 
   const handleExerciseDelete = async (exerciseId: number) => {
     try {
-      const { error } = await supabase
-        .from('exercises')
-        .delete()
-        .eq('id', exerciseId)
-
-      if (error) throw error
-      
-      setExercises(prev => prev.filter(ex => ex.id !== exerciseId))
+      await apiRequestAuto('DELETE', `/api/exercises/${exerciseId}`)
+      queryClient.invalidateQueries({ queryKey: ['/api/exercises'] })
     } catch (error) {
       console.error('Error deleting exercise:', error)
     }
@@ -247,7 +199,7 @@ export default function ExerciseLibrary() {
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
                       {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>
+                        <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
                       ))}
@@ -344,7 +296,7 @@ export default function ExerciseLibrary() {
                   onPreview={() => setPreviewExercise(exercise)}
                   onUpdate={handleExerciseUpdate}
                   onDelete={handleExerciseDelete}
-                  showActions={exercise.created_by === user?.id}
+                  showActions={exercise.createdBy === user?.id}
                 />
               ))}
             </div>
@@ -367,7 +319,7 @@ export default function ExerciseLibrary() {
           open={showUpload}
           onClose={() => setShowUpload(false)}
           onSuccess={(newExercise) => {
-            setExercises(prev => [newExercise, ...prev])
+            queryClient.invalidateQueries({ queryKey: ['/api/exercises'] })
             setShowUpload(false)
           }}
         />

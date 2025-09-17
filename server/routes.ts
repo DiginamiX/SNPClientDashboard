@@ -14,6 +14,7 @@ import {
   insertMessageSchema,
   insertNutritionPlanSchema,
   insertExerciseSchema,
+  insertExerciseCategorySchema,
   insertProgramSchema,
   insertWorkoutSchema,
   insertWorkoutExerciseSchema,
@@ -1192,6 +1193,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
       res.status(500).json({ message: 'Server error creating exercise' });
+    }
+  });
+
+  // Exercise categories routes
+  apiRouter.get('/exercise-categories', isAuthenticated, async (req, res) => {
+    try {
+      const rlsStorage = getRlsStorage(req);
+      const categories = await rlsStorage.getExerciseCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error fetching exercise categories' });
+    }
+  });
+
+  apiRouter.post('/exercise-categories', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only coaches can create exercise categories' });
+      }
+
+      const rlsStorage = getRlsStorage(req);
+      const categoryData = insertExerciseCategorySchema.parse(req.body);
+      
+      const category = await rlsStorage.createExerciseCategory(categoryData);
+      res.status(201).json(category);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Server error creating exercise category' });
     }
   });
 

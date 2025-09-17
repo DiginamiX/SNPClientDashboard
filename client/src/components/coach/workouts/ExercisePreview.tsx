@@ -6,25 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-interface Exercise {
-  id: number
-  name: string
-  description: string
-  instructions: string
-  muscle_groups: string[]
-  equipment: string
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced'
-  video_url?: string
-  thumbnail_url?: string
-  created_by: string
-  is_public: boolean
-  tags: string[]
-  category: string
-  calories_per_minute?: number
-  created_at: string
-  updated_at: string
-}
+import { Exercise } from '@shared/schema'
 
 interface ExercisePreviewProps {
   exercise: Exercise
@@ -71,9 +53,9 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                 <DialogTitle className="text-2xl font-display text-gradient-orange">
                   {exercise.name}
                 </DialogTitle>
-                {exercise.category && (
+                {exercise.categoryId && (
                   <p className="text-muted-foreground mt-1">
-                    {exercise.category}
+                    {exercise.categoryId}
                   </p>
                 )}
               </div>
@@ -92,23 +74,23 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
             <div className="p-6 space-y-6">
               {/* Video/Image Section */}
               <div className="relative aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg overflow-hidden">
-                {exercise.video_url ? (
+                {exercise.videoUrl ? (
                   <div className="relative w-full h-full">
                     <video
                       className="w-full h-full object-cover"
-                      poster={exercise.thumbnail_url}
+                      poster={exercise.thumbnailUrl}
                       controls
                       muted={isMuted}
                       onPlay={() => setIsPlaying(true)}
                       onPause={() => setIsPlaying(false)}
                     >
-                      <source src={exercise.video_url} type="video/mp4" />
+                      <source src={exercise.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                   </div>
-                ) : exercise.thumbnail_url ? (
+                ) : exercise.thumbnailUrl ? (
                   <img
-                    src={exercise.thumbnail_url}
+                    src={exercise.thumbnailUrl}
                     alt={exercise.name}
                     className="w-full h-full object-cover"
                   />
@@ -128,8 +110,8 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                       <Target className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <h4 className="font-semibold mb-1">Difficulty</h4>
-                    <Badge className={difficultyColors[exercise.difficulty_level]}>
-                      {exercise.difficulty_level}
+                    <Badge className={difficultyColors[exercise.difficultyLevel]}>
+                      {exercise.difficultyLevel}
                     </Badge>
                   </CardContent>
                 </Card>
@@ -148,7 +130,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                 </Card>
 
                 {/* Calories */}
-                {exercise.calories_per_minute && (
+                {exercise.caloriesPerMinute && (
                   <Card variant="glass">
                     <CardContent className="p-4 text-center">
                       <div className="flex items-center justify-center mb-2">
@@ -156,7 +138,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                       </div>
                       <h4 className="font-semibold mb-1">Calories</h4>
                       <p className="text-sm text-muted-foreground">
-                        {exercise.calories_per_minute}/min
+                        {exercise.caloriesPerMinute}/min
                       </p>
                     </CardContent>
                   </Card>
@@ -203,12 +185,12 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
               )}
 
               {/* Muscle Groups */}
-              {exercise.muscle_groups && exercise.muscle_groups.length > 0 && (
+              {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
                 <Card variant="premium">
                   <CardContent className="p-4">
                     <h4 className="font-semibold mb-3">Target Muscle Groups</h4>
                     <div className="flex flex-wrap gap-2">
-                      {exercise.muscle_groups.map((muscle, index) => (
+                      {exercise.muscleGroups.map((muscle, index) => (
                         <Badge
                           key={muscle}
                           className={muscleGroupColors[index % muscleGroupColors.length]}
@@ -244,13 +226,13 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   <span>
-                    {exercise.is_public ? 'Public Exercise' : 'Private Exercise'}
+                    {exercise.isPublic ? 'Public Exercise' : 'Private Exercise'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>
-                    Created {formatDate(exercise.created_at)}
+                    Created {formatDate(exercise.createdAt)}
                   </span>
                 </div>
               </div>

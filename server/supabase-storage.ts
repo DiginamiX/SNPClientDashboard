@@ -11,6 +11,7 @@ import {
   type NutritionPlan, type InsertNutritionPlan,
   type DeviceIntegration, type InsertDeviceIntegration,
   type Exercise, type InsertExercise,
+  type ExerciseCategory, type InsertExerciseCategory,
   type Program, type InsertProgram,
   type Workout, type InsertWorkout,
   type ClientProgram, type InsertClientProgram,
@@ -618,6 +619,64 @@ export class SupabaseStorage implements IStorage {
   async deleteExercise(id: number): Promise<void> {
     const { error } = await this.supabase
       .from('exercises')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
+  // Exercise category operations
+  async createExerciseCategory(category: InsertExerciseCategory): Promise<ExerciseCategory> {
+    const { data, error } = await this.supabase
+      .from('exercise_categories')
+      .insert(this.toDb(category))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return this.fromDb<ExerciseCategory>(data);
+  }
+
+  async getExerciseCategories(): Promise<ExerciseCategory[]> {
+    const { data, error } = await this.supabase
+      .from('exercise_categories')
+      .select('*')
+      .order(this.k('orderIndex'))
+      .order(this.k('name'));
+
+    if (error) throw error;
+    return data ? this.fromDbArray<ExerciseCategory>(data) : [];
+  }
+
+  async getExerciseCategory(id: number): Promise<ExerciseCategory | undefined> {
+    const { data, error } = await this.supabase
+      .from('exercise_categories')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return undefined; // Row not found
+      throw error;
+    }
+    return data ? this.fromDb<ExerciseCategory>(data) : undefined;
+  }
+
+  async updateExerciseCategory(id: number, category: Partial<InsertExerciseCategory>): Promise<ExerciseCategory> {
+    const { data, error } = await this.supabase
+      .from('exercise_categories')
+      .update(this.toDb(category))
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return this.fromDb<ExerciseCategory>(data);
+  }
+
+  async deleteExerciseCategory(id: number): Promise<void> {
+    const { error } = await this.supabase
+      .from('exercise_categories')
       .delete()
       .eq('id', id);
 

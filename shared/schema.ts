@@ -141,10 +141,26 @@ export const exercises = pgTable("exercises", {
   muscleGroups: text("muscle_groups").array(), // Array of muscle groups
   equipment: text("equipment"),
   difficultyLevel: difficultyLevelEnum("difficulty_level"),
+  categoryId: integer("category_id").references(() => exerciseCategories.id),
   videoUrl: text("video_url"),
   thumbnailUrl: text("thumbnail_url"),
   createdBy: uuid("created_by").references(() => users.id), // User UUID for created by
   isPublic: boolean("is_public").default(false),
+  tags: text("tags").array(), // Array of tags for better searchability
+  caloriesPerMinute: integer("calories_per_minute"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Exercise categories
+export const exerciseCategories = pgTable("exercise_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  iconName: text("icon_name"),
+  colorHex: text("color_hex"),
+  isDefault: boolean("is_default").default(false),
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -552,6 +568,7 @@ export const insertDeviceIntegrationSchema = createInsertSchema(deviceIntegratio
 
 // New schemas for enhanced platform
 export const insertExerciseSchema = createInsertSchema(exercises).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseCategorySchema = createInsertSchema(exerciseCategories).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertProgramSchema = createInsertSchema(programs).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertWorkoutSchema = createInsertSchema(workouts).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertWorkoutExerciseSchema = createInsertSchema(workoutExercises).omit({ id: true });
@@ -595,6 +612,9 @@ export type InsertDeviceIntegration = z.infer<typeof insertDeviceIntegrationSche
 // New types for enhanced platform
 export type Exercise = typeof exercises.$inferSelect;
 export type InsertExercise = z.infer<typeof insertExerciseSchema>;
+
+export type ExerciseCategory = typeof exerciseCategories.$inferSelect;
+export type InsertExerciseCategory = z.infer<typeof insertExerciseCategorySchema>;
 
 export type Program = typeof programs.$inferSelect;
 export type InsertProgram = z.infer<typeof insertProgramSchema>;

@@ -11,27 +11,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
-import { supabase } from '@/lib/supabase'
-import { storage } from '@/lib/storage'
-
-interface Exercise {
-  id: number
-  name: string
-  description: string
-  instructions: string
-  muscle_groups: string[]
-  equipment: string
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced'
-  video_url?: string
-  thumbnail_url?: string
-  created_by: string
-  is_public: boolean
-  tags: string[]
-  category: string
-  calories_per_minute?: number
-  created_at: string
-  updated_at: string
-}
+import { apiRequestAuto } from '@/lib/queryClient'
+import { Exercise } from '@shared/schema'
 
 interface ExerciseUploadProps {
   open: boolean

@@ -5,25 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-
-interface Exercise {
-  id: number
-  name: string
-  description: string
-  instructions: string
-  muscle_groups: string[]
-  equipment: string
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced'
-  video_url?: string
-  thumbnail_url?: string
-  created_by: string
-  is_public: boolean
-  tags: string[]
-  category: string
-  calories_per_minute?: number
-  created_at: string
-  updated_at: string
-}
+import { Exercise } from '@shared/schema'
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -92,9 +74,9 @@ export default function ExerciseCard({
       >
         {/* Video/Thumbnail Header */}
         <div className="relative aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-t-lg overflow-hidden">
-          {exercise.thumbnail_url || exercise.video_url ? (
+          {exercise.thumbnailUrl || exercise.videoUrl ? (
             <img
-              src={exercise.thumbnail_url || exercise.video_url}
+              src={exercise.thumbnailUrl || exercise.videoUrl || ''}
               alt={exercise.name}
               className="w-full h-full object-cover"
             />
@@ -105,7 +87,7 @@ export default function ExerciseCard({
           )}
           
           {/* Video Play Button */}
-          {exercise.video_url && (
+          {exercise.videoUrl && (
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
               <Button
                 size="icon"
@@ -119,8 +101,8 @@ export default function ExerciseCard({
 
           {/* Difficulty Badge */}
           <div className="absolute top-2 left-2">
-            <Badge className={difficultyColors[exercise.difficulty_level]}>
-              {exercise.difficulty_level}
+            <Badge className={difficultyColors[exercise.difficultyLevel || 'beginner']}>
+              {exercise.difficultyLevel}
             </Badge>
           </div>
 
@@ -165,9 +147,9 @@ export default function ExerciseCard({
             <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
               {exercise.name}
             </h3>
-            {exercise.category && (
+            {exercise.categoryId && (
               <p className="text-sm text-muted-foreground">
-                {exercise.category}
+                Category {exercise.categoryId}
               </p>
             )}
           </div>
@@ -180,9 +162,9 @@ export default function ExerciseCard({
           )}
 
           {/* Muscle Groups */}
-          {exercise.muscle_groups && exercise.muscle_groups.length > 0 && (
+          {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
-              {exercise.muscle_groups.slice(0, 3).map((muscle, index) => (
+              {exercise.muscleGroups.slice(0, 3).map((muscle, index) => (
                 <Badge
                   key={muscle}
                   variant="secondary"
@@ -191,9 +173,9 @@ export default function ExerciseCard({
                   {muscle}
                 </Badge>
               ))}
-              {exercise.muscle_groups.length > 3 && (
+              {exercise.muscleGroups.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{exercise.muscle_groups.length - 3}
+                  +{exercise.muscleGroups.length - 3}
                 </Badge>
               )}
             </div>
@@ -208,16 +190,16 @@ export default function ExerciseCard({
                   <span className="capitalize">{exercise.equipment}</span>
                 </div>
               )}
-              {exercise.calories_per_minute && (
+              {exercise.caloriesPerMinute && (
                 <div className="flex items-center gap-1">
                   <Zap className="w-4 h-4" />
-                  <span>{exercise.calories_per_minute}/min</span>
+                  <span>{exercise.caloriesPerMinute}/min</span>
                 </div>
               )}
             </div>
 
             {/* Public/Private Indicator */}
-            {!exercise.is_public && showActions && (
+            {!exercise.isPublic && showActions && (
               <Badge variant="outline" className="text-xs">
                 Private
               </Badge>
@@ -256,7 +238,7 @@ export default function ExerciseCard({
             <AlertDialogTitle>Delete Exercise</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{exercise.name}"? This action cannot be undone.
-              {exercise.is_public && (
+              {exercise.isPublic && (
                 <span className="block mt-2 text-amber-600 dark:text-amber-400">
                   This is a public exercise that may be used by other coaches.
                 </span>
