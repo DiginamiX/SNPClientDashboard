@@ -2,6 +2,11 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { supabase } from './supabase';
 import type { Session } from '@supabase/supabase-js';
 
+// Dev-only URL rewrite to bypass Vite proxy issue
+const DEV_ALIAS = '/internal-api';
+const rewriteApiUrl = (url: string) => 
+  import.meta.env.DEV && url.startsWith('/api') ? url.replace('/api', DEV_ALIAS) : url;
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -44,7 +49,8 @@ export async function apiRequest(
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
   
   try {
-    const res = await fetch(url, {
+    const rewrittenUrl = rewriteApiUrl(url);
+    const res = await fetch(rewrittenUrl, {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,
@@ -92,7 +98,8 @@ export const getQueryFn: <T>(options?: {
       ? getAuthHeaders(session)
       : await getAuthenticatedHeaders();
     
-    const res = await fetch(queryKey[0] as string, {
+    const url = rewriteApiUrl(queryKey[0] as string);
+    const res = await fetch(url, {
       headers,
     });
 

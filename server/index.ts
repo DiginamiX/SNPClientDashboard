@@ -37,6 +37,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Dev-only alias to bypass Vite proxy issue: /internal-api -> /api
+  if (app.get('env') === 'development') {
+    app.use('/internal-api', (req, _res, next) => { 
+      req.url = req.url.replace(/^\/internal-api/, '/api'); 
+      next(); 
+    });
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
