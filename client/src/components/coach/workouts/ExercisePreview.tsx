@@ -78,7 +78,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                   <div className="relative w-full h-full">
                     <video
                       className="w-full h-full object-cover"
-                      poster={exercise.thumbnailUrl}
+                      poster={exercise.thumbnailUrl || undefined}
                       controls
                       muted={isMuted}
                       onPlay={() => setIsPlaying(true)}
@@ -90,7 +90,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                   </div>
                 ) : exercise.thumbnailUrl ? (
                   <img
-                    src={exercise.thumbnailUrl}
+                    src={exercise.thumbnailUrl || ''}
                     alt={exercise.name}
                     className="w-full h-full object-cover"
                   />
@@ -110,7 +110,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                       <Target className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <h4 className="font-semibold mb-1">Difficulty</h4>
-                    <Badge className={difficultyColors[exercise.difficultyLevel]}>
+                    <Badge className={difficultyColors[exercise.difficultyLevel || 'beginner']}>
                       {exercise.difficultyLevel}
                     </Badge>
                   </CardContent>
@@ -232,7 +232,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>
-                    Created {formatDate(exercise.createdAt)}
+                    Created {formatDate(exercise.createdAt || new Date().toISOString())}
                   </span>
                 </div>
               </div>
