@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 interface MessageItemProps {
   sender: {
@@ -31,10 +32,13 @@ export default function MessageItem({ sender, preview, time, unread = false, onC
       onClick={onClick}
     >
       <div className="flex">
-        <img
+        <OptimizedImage
           src={sender.avatar}
           alt={`${sender.name} profile`}
           className="w-10 h-10 rounded-full object-cover"
+          sizes="40px"
+          loading="lazy"
+          data-testid={`avatar-${sender.name.toLowerCase().replace(/\s+/g, '-')}`}
         />
         <div className="ml-3 flex-1">
           <div className="flex items-center justify-between">

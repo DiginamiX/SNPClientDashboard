@@ -39,6 +39,8 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { ProgressPhoto } from '@/types';
 import { formatDate } from '@/lib/dateUtils';
+import { OptimizedImage, ProgressiveImage } from '@/components/ui/optimized-image';
+import { usePerformanceTracking } from '@/lib/performance';
 
 const formSchema = z.object({
   photo: z.instanceof(File).refine(file => file.size > 0, {
@@ -57,6 +59,9 @@ export default function ProgressPhotos() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Initialize performance tracking for this page
+  usePerformanceTracking('ProgressPhotos');
 
   // Fetch progress photos
   const { data: photos, isLoading } = useQuery<ProgressPhoto[]>({
@@ -199,10 +204,12 @@ export default function ProgressPhotos() {
                             />
                             {previewUrl && (
                               <div className="rounded-md overflow-hidden border border-slate-200 dark:border-slate-700">
-                                <img
+                                <OptimizedImage
                                   src={previewUrl}
                                   alt="Preview"
                                   className="w-full h-auto max-h-48 object-contain"
+                                  sizes="(max-width: 768px) 100vw, 400px"
+                                  priority
                                 />
                               </div>
                             )}
@@ -347,10 +354,13 @@ export default function ProgressPhotos() {
                             className="relative group cursor-pointer aspect-square overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700"
                             onClick={() => setSelectedPhoto(photo)}
                           >
-                            <img
+                            <ProgressiveImage
                               src={photo.imageUrl}
                               alt={`Progress photo from ${formatDate(photo.date)}`}
                               className="w-full h-full object-cover transition duration-200 group-hover:scale-105"
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                              loading="lazy"
+                              data-testid={`progress-photo-${photo.id}`}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2">
                               <span className="text-white text-sm font-medium">
@@ -372,10 +382,13 @@ export default function ProgressPhotos() {
                             )}
                           </DialogHeader>
                           <div className="p-2">
-                            <img
+                            <OptimizedImage
                               src={photo.imageUrl}
                               alt={`Progress photo from ${formatDate(photo.date)}`}
                               className="w-full max-h-[70vh] object-contain rounded-lg"
+                              sizes="(max-width: 768px) 100vw, 90vw"
+                              priority
+                              data-testid={`progress-photo-modal-${photo.id}`}
                             />
                             {photo.notes && (
                               <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
