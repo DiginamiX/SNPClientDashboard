@@ -63,15 +63,34 @@ export async function apiRequest(
   }
 }
 
+// Auto-authenticated query function that gets session from Supabase
+async function getAuthenticatedHeaders(): Promise<Record<string, string>> {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('Error getting session for auth headers:', error);
+      return { 'Content-Type': 'application/json' };
+    }
+    return getAuthHeaders(session);
+  } catch (error) {
+    console.warn('Failed to get session for auth headers:', error);
+    return { 'Content-Type': 'application/json' };
+  }
+}
+
 type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
+export const getQueryFn: <T>(options?: {
+  on401?: UnauthorizedBehavior;
   session?: Session | null;
 }) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior, session }) =>
+  ({ on401: unauthorizedBehavior = "throw", session } = {}) =>
   async ({ queryKey }) => {
     console.log('🔍 Making authenticated query to:', queryKey[0]);
-    const headers = getAuthHeaders(session || null);
+    
+    // Use provided session or get current session automatically
+    const headers = session 
+      ? getAuthHeaders(session)
+      : await getAuthenticatedHeaders();
     
     const res = await fetch(queryKey[0] as string, {
       headers,
@@ -88,10 +107,24 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Enhanced apiRequest that auto-gets session if not provided
+export async function apiRequestAuto(
+  method: string,
+  url: string,
+  data?: unknown | undefined,
+  sessionOverride?: Session | null,
+): Promise<Response> {
+  const session = sessionOverride !== undefined 
+    ? sessionOverride 
+    : (await supabase.auth.getSession()).data.session;
+    
+  return apiRequest(method, url, data, session);
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }), // Sessions will be passed from components
+      queryFn: getQueryFn({ on401: "throw" }), // Auto-authenticates with current session
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
