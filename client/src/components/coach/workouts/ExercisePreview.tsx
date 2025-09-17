@@ -232,7 +232,7 @@ export default function ExercisePreview({ exercise, open, onClose }: ExercisePre
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>
-                    Created {formatDate(exercise.createdAt || new Date().toISOString())}
+                    Created {formatDate(exercise.createdAt ? (typeof exercise.createdAt === 'string' ? exercise.createdAt : exercise.createdAt.toISOString()) : new Date().toISOString())}
                   </span>
                 </div>
               </div>

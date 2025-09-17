@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
-import { apiRequestAuto } from '@/lib/queryClient'
+import { apiRequestAuto, queryClient } from '@/lib/queryClient'
 import { Exercise } from '@shared/schema'
 
 interface ExerciseUploadProps {
@@ -45,7 +45,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
     muscleGroups: editExercise?.muscleGroups || [],
     equipment: editExercise?.equipment || '',
     difficultyLevel: editExercise?.difficultyLevel || 'beginner',
-    categoryId: editExercise?.categoryId || '',
+    categoryId: editExercise?.categoryId ? editExercise.categoryId.toString() : '',
     caloriesPerMinute: editExercise?.caloriesPerMinute || '',
     isPublic: editExercise?.isPublic || false,
     tags: editExercise?.tags || []
@@ -137,40 +137,36 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
 
       setUploadProgress(75)
 
-      // Create/update exercise in database
+      // Create/update exercise via API
       const exerciseData = {
-        ...formData,
-        videoUrl,
-        thumbnailUrl,
-        calories_per_minute: formData.caloriesPerMinute ? parseFloat(formData.caloriesPerMinute.toString()) : null,
-        created_by: user.id,
-        updated_at: new Date().toISOString()
+        name: formData.name,
+        description: formData.description,
+        instructions: formData.instructions,
+        muscleGroups: formData.muscleGroups,
+        equipment: formData.equipment,
+        difficultyLevel: formData.difficultyLevel,
+        categoryId: formData.categoryId ? parseInt(formData.categoryId.toString()) : null,
+        videoUrl: videoUrl,
+        thumbnailUrl: thumbnailUrl,
+        isPublic: formData.isPublic,
+        tags: formData.tags,
+        caloriesPerMinute: formData.caloriesPerMinute ? parseInt(formData.caloriesPerMinute.toString()) : null
       }
 
       let result
       if (editExercise) {
         // Update existing exercise
-        const { data, error } = await supabase
-          .from('exercises')
-          .update(exerciseData)
-          .eq('id', editExercise.id)
-          .select()
-          .single()
-        
-        if (error) throw error
-        result = data
+        const response = await apiRequestAuto('PATCH', `/api/exercises/${editExercise.id}`, exerciseData)
+        result = await response.json()
       } else {
         // Create new exercise
-        const { data, error } = await supabase
-          .from('exercises')
-          .insert(exerciseData)
-          .select()
-          .single()
-        
-        if (error) throw error
-        result = data
+        const response = await apiRequestAuto('POST', '/api/exercises', exerciseData)
+        result = await response.json()
       }
 
+      // Invalidate exercises cache
+      queryClient.invalidateQueries({ queryKey: ['/api/exercises'] })
+      
       setUploadProgress(100)
       onSuccess(result)
       
@@ -188,12 +184,12 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
       name: '',
       description: '',
       instructions: '',
-      muscle_groups: [],
+      muscleGroups: [],
       equipment: '',
-      difficulty_level: 'beginner',
-      category: '',
-      calories_per_minute: '',
-      is_public: false,
+      difficultyLevel: 'beginner',
+      categoryId: '',
+      caloriesPerMinute: '',
+      isPublic: false,
       tags: []
     })
     setVideoFile(null)
@@ -328,7 +324,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                       type="number"
                       step="0.1"
                       value={formData.caloriesPerMinute}
-                      onChange={(e) => handleInputChange('calories_per_minute', e.target.value)}
+                      onChange={(e) => handleInputChange('caloriesPerMinute', e.target.value)}
                       placeholder="e.g., 8.5"
                     />
                   </div>
@@ -520,7 +516,7 @@ export default function ExerciseUpload({ open, onClose, onSuccess, editExercise 
                   <Switch
                     id="public"
                     checked={formData.isPublic}
-                    onCheckedChange={(checked) => handleInputChange('is_public', checked)}
+                    onCheckedChange={(checked) => handleInputChange('isPublic', checked)}
                   />
                 </div>
               </CardContent>
