@@ -4,7 +4,7 @@ interface SocketEvents {
   // Message events
   'send-message': (data: { room: string; message: any }) => void
   'receive-message': (data: any) => void
-  'message-read': (data: { messageId: number; userId: number }) => void
+  'message-read': (data: { messageId: number; userId: string }) => void
   
   // Workout events
   'workout-start': (data: { workoutLogId: number; clientId: number }) => void
@@ -26,7 +26,7 @@ class SocketService {
   private maxReconnectAttempts = 5
   private reconnectDelay = 1000
 
-  connect(userId: number, userRole: 'client' | 'admin'): Promise<void> {
+  connect(userId: string, userRole: 'client' | 'admin'): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         this.socket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : '', {
@@ -123,9 +123,17 @@ class SocketService {
   }
 
   // Messaging methods
-  sendMessage(recipientId: number, content: string, type: 'text' | 'image' | 'workout' | 'meal_plan' = 'text'): void {
+  private getConversationRoom(otherUserId: string): string {
+    const currentUserId = (this.socket?.auth as { userId?: string } | undefined)?.userId
+    if (!currentUserId) {
+      return `conversation-${otherUserId}`
+    }
+    return [currentUserId, otherUserId].sort().join('::')
+  }
+
+  sendMessage(recipientId: string, content: string, type: 'text' | 'image' | 'workout' | 'meal_plan' = 'text'): void {
     this.emit('send-message', {
-      room: `conversation-${Math.min(recipientId, 0)}-${Math.max(recipientId, 0)}`, // Consistent room naming
+      room: this.getConversationRoom(recipientId),
       message: {
         recipientId,
         content,

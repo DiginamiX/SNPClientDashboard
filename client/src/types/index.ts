@@ -1,6 +1,6 @@
 // User related types
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   firstName: string;
@@ -12,7 +12,7 @@ export interface User {
 
 export interface Client {
   id: number;
-  userId: number;
+  userId: string;
   coachId: number | null;
   height: number | null;
   startingWeight: number | null;
@@ -22,7 +22,7 @@ export interface Client {
 
 export interface Coach {
   id: number;
-  userId: number;
+  userId: string;
   specialization: string | null;
   bio: string | null;
 }
@@ -70,8 +70,8 @@ export interface CheckinWithCoach extends Checkin {
 // Message related types
 export interface Message {
   id: number;
-  senderId: number;
-  receiverId: number;
+  senderId: string;
+  receiverId: string;
   content: string;
   isRead: boolean;
   createdAt: string;
@@ -79,8 +79,8 @@ export interface Message {
 
 export interface MessageWithUserDetails {
   id: number;
-  senderId: number;
-  receiverId: number;
+  senderId: string;
+  receiverId: string;
   senderName: string;
   senderAvatar: string;
   content: string;
@@ -90,7 +90,7 @@ export interface MessageWithUserDetails {
 
 // Conversation summary for the inbox
 export interface ConversationSummary {
-  userId: number;
+  userId: string;
   userName: string;
   userAvatar: string;
   lastMessage: string;
@@ -169,6 +169,6 @@ export interface CheckinFormData {
 }
 
 export interface MessageFormData {
-  receiverId: number;
+  receiverId: string;
   content: string;
 }

@@ -73,7 +73,7 @@ export class StorageService {
     })
   }
 
-  async uploadAvatar(file: File, userId: number): Promise<{ url: string }> {
+  async uploadAvatar(file: File, userId: string): Promise<{ url: string }> {
     return this.uploadFile(file, `avatars/${userId}`, {
       maxFileSize: 5 * 1024 * 1024, // 5MB for avatars
       allowedTypes: ['image/jpeg', 'image/png', 'image/webp']

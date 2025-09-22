@@ -33,6 +33,7 @@ import rateLimit from "express-rate-limit";
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -74,16 +75,8 @@ const upload = multer({
   }
 });
 
-// Supabase client setup for JWT verification
-// Use working Supabase URL (temporary fix for environment variable caching)
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY environment variables must be set');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Supabase client setup for JWT verification (fallback values handled in config)
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Rate limiting configuration
 const authRateLimit = rateLimit({
@@ -1231,15 +1224,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/programs', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      let programs;
-
       const rlsStorage = getRlsStorage(req);
+
       if (user.role === 'admin') {
-        programs = await rlsStorage.getProgramsByCoachId(user.id);
-      } else {
-        programs = await rlsStorage.getPrograms();
+        const coach = await rlsStorage.getCoachByUserId(user.id);
+        if (!coach) {
+          return res.status(404).json({ message: 'Coach profile not found' });
+        }
+
+        const programs = await rlsStorage.getProgramsByCoachId(coach.id);
+        return res.json(programs);
       }
 
+      const programs = await rlsStorage.getPrograms();
       res.json(programs);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching programs' });
@@ -1254,9 +1251,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const rlsStorage = getRlsStorage(req);
+      const coach = await rlsStorage.getCoachByUserId(user.id);
+      if (!coach) {
+        return res.status(400).json({ message: 'Coach profile not found. Please complete your coach profile before creating programs.' });
+      }
+
       const programData = insertProgramSchema.parse({
         ...req.body,
-        coachId: user.id
+        coachId: coach.id
       });
 
       const program = await rlsStorage.createProgram(programData);
@@ -1277,24 +1279,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only coaches can assign programs' });
       }
 
-      const programId = parseInt(req.params.id);
+      const programId = parseInt(req.params.id, 10);
+      if (Number.isNaN(programId)) {
+        return res.status(400).json({ message: 'Invalid program id' });
+      }
       const { clientIds, startDate, notes } = req.body;
 
       if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
         return res.status(400).json({ message: 'Client IDs are required' });
       }
 
+      const rlsStorage = getRlsStorage(req);
       const assignments = [];
       for (const clientId of clientIds) {
+        const numericClientId = typeof clientId === 'string' ? parseInt(clientId, 10) : clientId;
+        if (Number.isNaN(numericClientId)) {
+          return res.status(400).json({ message: 'Invalid client id supplied' });
+        }
+
         const assignmentData = insertClientProgramSchema.parse({
-          clientId: parseInt(clientId),
+          clientId: numericClientId,
           programId,
           assignedBy: user.id,
           startDate,
           notes
         });
 
-        const rlsStorage = getRlsStorage(req);
         const assignment = await rlsStorage.assignProgramToClient(assignmentData);
         assignments.push(assignment);
       }
@@ -1364,17 +1374,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/client-programs', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      let clientPrograms;
-
       const rlsStorage = getRlsStorage(req);
       if (user.role === 'admin') {
         // Coach viewing all their assigned programs
-        clientPrograms = await rlsStorage.getClientProgramsByCoachId(user.id);
-      } else {
-        // Client viewing their own programs
-        clientPrograms = await rlsStorage.getClientPrograms(user.id);
+        const clientPrograms = await rlsStorage.getClientProgramsByCoachId(user.id);
+        return res.json(clientPrograms);
       }
 
+      const client = await rlsStorage.getClientByUserId(user.id);
+      if (!client) {
+        return res.status(404).json({ message: 'Client profile not found' });
+      }
+
+      const clientPrograms = await rlsStorage.getClientPrograms(client.id);
       res.json(clientPrograms);
     } catch (error) {
       res.status(500).json({ message: 'Server error fetching client programs' });
@@ -1387,9 +1399,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       
       const rlsStorage = getRlsStorage(req);
+      let targetClientId: number | null = null;
+
+      if (user.role === 'admin') {
+        const rawClientId = req.body.clientId;
+        if (rawClientId === undefined || rawClientId === null) {
+          return res.status(400).json({ message: 'clientId is required when creating logs for a client' });
+        }
+
+        const parsedClientId = typeof rawClientId === 'string' ? parseInt(rawClientId, 10) : rawClientId;
+        if (Number.isNaN(parsedClientId)) {
+          return res.status(400).json({ message: 'Invalid clientId provided' });
+        }
+        targetClientId = parsedClientId;
+      } else {
+        const client = await rlsStorage.getClientByUserId(user.id);
+        if (!client) {
+          return res.status(404).json({ message: 'Client profile not found' });
+        }
+        targetClientId = client.id;
+      }
+
       const workoutLogData = insertWorkoutLogSchema.parse({
         ...req.body,
-        clientId: user.id
+        clientId: targetClientId,
       });
 
       const workoutLog = await rlsStorage.createWorkoutLog(workoutLogData);
@@ -1405,15 +1438,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get('/workout-logs', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const clientId = parseInt(req.query.clientId as string) || user.id;
-
       const rlsStorage = getRlsStorage(req);
-      // RLS will handle authorization checks, but we still do explicit checks for transparency
-      if (user.role !== 'admin' && clientId !== user.id) {
-        return res.status(403).json({ message: 'Unauthorized to access these workout logs' });
+
+      const rawClientId = req.query.clientId as string | undefined;
+      let clientIdForQuery: number;
+
+      if (user.role === 'admin') {
+        if (!rawClientId) {
+          return res.status(400).json({ message: 'clientId query parameter is required for coaches' });
+        }
+
+        const parsedClientId = parseInt(rawClientId, 10);
+        if (Number.isNaN(parsedClientId)) {
+          return res.status(400).json({ message: 'Invalid clientId provided' });
+        }
+        clientIdForQuery = parsedClientId;
+      } else {
+        const client = await rlsStorage.getClientByUserId(user.id);
+        if (!client) {
+          return res.status(404).json({ message: 'Client profile not found' });
+        }
+
+        clientIdForQuery = client.id;
+
+        if (rawClientId) {
+          const requestedId = parseInt(rawClientId, 10);
+          if (Number.isNaN(requestedId)) {
+            return res.status(400).json({ message: 'Invalid clientId provided' });
+          }
+          if (requestedId !== clientIdForQuery) {
+            return res.status(403).json({ message: 'Unauthorized to access these workout logs' });
+          }
+        }
       }
 
-      const workoutLogs = await rlsStorage.getWorkoutLogsByClientId(clientId);
+      const workoutLogs = await rlsStorage.getWorkoutLogsByClientId(clientIdForQuery);
       
       // Enhance workout logs with full workout details
       const enhancedLogs = await Promise.all(workoutLogs.map(async (log) => {
@@ -1473,23 +1532,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rlsStorage = SupabaseStorage.withUserToken(token);
 
       // Check if user with this email already exists
-      const existingUser = await rlsStorage.getUserByEmail(email);
+      const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'User with this email already exists' });
       }
 
       // Create user account for the client
       const hashedPassword = await bcrypt.hash('defaultpassword123', 10); // Temporary password
-      const userData = {
-        username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
+      const baseUsername = `${firstName}.${lastName}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '.')
+        .replace(/\.{2,}/g, '.')
+        .replace(/^\./, '')
+        .replace(/\.$/, '') || 'client';
+
+      let usernameCandidate = baseUsername;
+      let suffix = 1;
+      // Ensure username uniqueness using direct storage
+      while (await storage.getUserByUsername(usernameCandidate)) {
+        usernameCandidate = `${baseUsername}${suffix}`;
+        suffix += 1;
+      }
+
+      const newUser = await storage.createUser({
+        username: usernameCandidate,
         email,
         password: hashedPassword,
         firstName,
         lastName,
-        role: 'client' as const
-      };
-
-      const newUser = await rlsStorage.createUser(userData);
+        role: 'client'
+      });
 
       // Get the coach ID for the authenticated user (with RLS)
       const coach = await rlsStorage.getCoachByUserId(user.id);

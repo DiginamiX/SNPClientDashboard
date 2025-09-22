@@ -24,7 +24,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Messages() {
-  const [activeConversation, setActiveConversation] = useState<number | null>(null);
+  const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -49,7 +49,7 @@ export default function Messages() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (values: { receiverId: number; content: string }) => {
+    mutationFn: async (values: { receiverId: string; content: string }) => {
       return apiRequest('POST', '/api/messages', values);
     },
     onSuccess: () => {
@@ -112,7 +112,7 @@ export default function Messages() {
   const getConversationSummaries = (): ConversationSummary[] => {
     if (!messages || !user) return [];
     
-    const conversationsMap = new Map<number, ConversationSummary>();
+    const conversationsMap = new Map<string, ConversationSummary>();
     
     messages.forEach(message => {
       // Determine the other user in the conversation
@@ -159,9 +159,10 @@ export default function Messages() {
   };
 
   // Helper function to get coach name (mock data)
-  function getRandomCoachName(id: number): string {
+  function getRandomCoachName(id: string): string {
     const coaches = ['Coach Sarah', 'Coach Mike', 'Support Team', 'Coach Alex', 'Coach Jordan'];
-    return coaches[id % coaches.length];
+    const hash = Array.from(id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return coaches[hash % coaches.length];
   }
 
   const conversationSummaries = getConversationSummaries();
@@ -169,7 +170,7 @@ export default function Messages() {
   // Mock data for display while loading
   const mockConversations: ConversationSummary[] = [
     {
-      userId: 1,
+      userId: '1',
       userName: 'Coach Sarah',
       userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40',
       lastMessage: 'Great progress on your weight loss this week! Let\'s discuss next steps...',
@@ -177,7 +178,7 @@ export default function Messages() {
       unreadCount: 1
     },
     {
-      userId: 2,
+      userId: '2',
       userName: 'Coach Mike',
       userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40',
       lastMessage: 'I\'ve updated your nutrition plan. Please check and let me know your thoughts.',
@@ -185,7 +186,7 @@ export default function Messages() {
       unreadCount: 0
     },
     {
-      userId: 3,
+      userId: '3',
       userName: 'Support Team',
       userAvatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40',
       lastMessage: 'Your last check-in has been rescheduled to June 15th. Please confirm.',

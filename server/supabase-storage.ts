@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { IStorage } from './storage';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
 import {
   type User, type InsertUser,
   type Client, type InsertClient,
@@ -31,15 +32,8 @@ export class SupabaseStorage implements IStorage {
   private supabase;
 
   constructor(userToken?: string) {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY environment variables must be set');
-    }
-
     // Create Supabase client with user context for RLS enforcement
-    this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: userToken ? {
           Authorization: `Bearer ${userToken}`
